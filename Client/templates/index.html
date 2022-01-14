@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction submit</title>
+</head>
+<body>
+    <h1 align="center">Blockchain Client</h1>
+    <center>
+    <form style="margin:50px" name="sub" action="http://127.0.0.1:8080/submit" method="POST">
+<!--        id:<input style="margin: 10px" type="text" name="sender"><br>-->
+<!--        Object:<input style="margin: 10px" type="text" name="receiver"><br>-->
+<!--        Money:<input style="margin: 10px" type="text" name="money"><br>-->
+<!--        Fee:<input style="margin: 10px" type="text" name="txs_fee">-->
+        <table align="center">
+            <tr>
+            <td>id:</td>
+            <td>
+                <input style="margin: 10px" type="text" name="sender">
+            </td>
+            </tr>
+            <tr>
+            <td>Object:</td>
+            <td>
+                <input style="margin: 10px" type="text" name="receiver">
+            </td>
+            </tr>
+            <tr>
+            <td>Money:</td>
+            <td>
+                <input style="margin: 10px" type="text" name="money">
+            </td>
+            </tr>
+            <tr>
+            <td>Fee:</td>
+            <td>
+                <input style="margin: 10px" type="text" name="txs_fee">
+            </td>
+            </tr>
+        </table>
+        <table align="center">
+            <tr>
+            <td>
+                 <input type="submit" value="submit"></input>
+            </td>
+            </tr>
+        </table>
+        <HR align="center" style="border: double" width="300px"color="987cb9"size="3">
+    </form>
+    <form style="margin:10px" name="gen" action="http://127.0.0.1:8080/generate" method="POST">
+        <table align="center">
+            <tr>
+                <td>Less effort</td>
+                <td>
+                    <input type="submit" value="generate"></input>
+                </td>
+            </tr>
+        </table>
+    </form>
+    </center>
+
+</body>
+</html>
