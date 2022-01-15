@@ -123,7 +123,7 @@ def mgf1(mgf_seed, mask_len):
 
 def VRF_prove(public_key, private_key, alpha, k):
     # k is the length of pi
-    m = mgf1(alpha+str(public_key), k-1)
+    m = mgf1(alpha+str(public_key.format()), k-1)
     # print("EM:", m, type(m))
     pi = ecdsa_sign(private_key, m)
     # s = private_key.rsasp1(m)
@@ -134,10 +134,21 @@ def VRF_proof2hash(pi):
     return beta
 
 def VRF_verifying(public_key, pi, h, alpha, k):
-    if ecdsa_vrfy(public_key, h, pi) and mgf1(alpha+str(public_key), k-1) == h:
-        return True
+    # print("VRF verifying:",str(public_key.format()),pi,h,alpha,k)
+    if ecdsa_vrfy(public_key, h, pi):
+        if mgf1(alpha + str(public_key.format()), k - 1) == h:
+            return True
+        else:
+            print("mgf1 error")
+            return False
     else:
+        # print("verify signature error")
+        if mgf1(alpha + str(public_key.format()), k - 1) == h:
+            print("mgf1=h")
+        else:
+            print("mgf1 error")
         return False
+
 
 if __name__ == "__main__":
     pk, sk = ecdsa.pki(1000)
