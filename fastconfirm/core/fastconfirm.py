@@ -1,6 +1,7 @@
 from coincurve import PublicKey
 from gevent import monkey;
 
+# from check_keys import test_certain_key
 from fastconfirm.core.blockproposal import blockproposal
 from fastconfirm.core.commit import commit
 from fastconfirm.core.memselect import memselection, vrifymember
@@ -81,6 +82,23 @@ def broadcast_receiver_loop(recv_func, recv_queues):
 class Fastconfirm:
     def __init__(self, sid, pid, S, B, N, f, sPK2s, sSK2, send, recv,recv_txs,K, mute=False,
                  debug=True):
+        '''
+
+        :param sid:
+        :param pid:
+        :param S:
+        :param B:
+        :param N:
+        :param f:
+        :param sPK2s: public key of every one
+        :param sSK2: secert key of self
+        :param send:
+        :param recv:
+        :param recv_txs:
+        :param K:
+        :param mute:
+        :param debug:
+        '''
         self.sid = sid
         self.id = pid
         self.SLOTS_NUM = S
@@ -188,7 +206,7 @@ class Fastconfirm:
 
             return vote_send
 
-        delta = 2
+        delta = 0.2
         start = time.time()
         t, my_pi, my_h = memselection(self.round, 2, self.sPK2s[self.id], self.sSK2)
         if t == 1:
@@ -220,6 +238,7 @@ class Fastconfirm:
         else:
             while time.time() - start < delta:
                 gevent.sleep(0)
+            print(self.id,"vote phase t!=1")
             vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                  self.round, t, my_pi, my_h, None, make_vote_send(self.round))
 
@@ -229,7 +248,7 @@ class Fastconfirm:
                 :param k: Node to send.
                 :param o: Value to send.
                 """
-                print("node", self.id, " is sending ", o[0], " to node ", k, " with the round ", r)
+                # print("node", self.id, " is sending ", o[0], " to node ", k, " with the round ", r)
                 self._send(k, ('F_PC', r, o))
 
             return pc_send
@@ -244,13 +263,18 @@ class Fastconfirm:
             pc_hB = 0
             while time.time() - start < delta:
                 gevent.sleep(0)
+
             while vote_recvs.qsize() > 0:
+                # print("node", self.id, "vote_recv queue size", vote_recvs.qsize(),"in round",self.round)
                 gevent.sleep(0)
                 sender, (g, h, pi, hB, height, sig) = vote_recvs.get()
+                # test_certain_key(sender,"test",self.sPK2s[sender])
+                print("node",self.id,"recv from",sender,pi,h,str(self.sPK2s[sender]))
                 if vrifymember(self.round, 2, h, pi, self.sPK2s[sender]):
                     (s, b) = sig
                     # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
                     voteset[hB].put(sig)
+                    # print("round",self.round,"node",self.id,"votesize:",voteset[hB].qsize())
                     if voteset[hB].qsize() >= (2 * self.f + 1) * self.T:
                         pc_hB = hB
                         c = 1
@@ -378,7 +402,8 @@ class Fastconfirm:
                 # self.transaction_buffer.put_nowait(atx)
                 try:
                     sender, (tag, r, msg) = self._recv()
-                    # print('recv1' + str((sender, r, msg)))
+                    # print('recv '+tag+str((sender, r, msg)))
+                    # print("round",r,":node",self.id,"recv",tag,"from",sender)
                     # Maintain an *unbounded* recv queue for each epoch
                     if r not in self._per_round_recv:
                         self._per_round_recv[r] = Queue()
@@ -398,7 +423,7 @@ class Fastconfirm:
                 # print("node {} enter receive transactions loop".format(self.id))
                 try:
                     _,atx = self._recv_txs()
-                    print("node {} receive transaction {}".format(self.id,atx))
+                    # print("node {} receive transaction {}".format(self.id,atx))
                     self.transaction_buffer.put_nowait(atx)
                 except Exception as e:
                     # print(str(self.id)+":"+str((e,traceback.print_exc())))
@@ -410,7 +435,8 @@ class Fastconfirm:
 
 
 
-        while self.round <= 6:
+        while self.round <= self.SLOTS_NUM:
+            # print(self.id,str(self.sPK2s[0].format()),str(self.sPK2s[1].format()),str(self.sPK2s[2].format()),str(self.sPK2s[3].format()))
             if self.round not in self._per_round_recv:
                 self._per_round_recv[self.round] = Queue()
             st = time.time()

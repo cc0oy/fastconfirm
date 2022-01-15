@@ -16,6 +16,7 @@ def vote(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, leadermsg, send
         :param o: Value to send.
         """
         # print("node", pid, "is sending", o[0], "to node", k, "with the leader", j)
+        # print("node",pid," is broadcast",pi,h)
         for i in range(N):
             send(i, o)
 

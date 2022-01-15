@@ -16,8 +16,11 @@ def vrifymember(r, s, h, pi, pk, k=4, T=1):
     if VRF_verifying(pk, pi, h, str(r)+str(s), k):
         if int.from_bytes(h, 'big') > threshold:
             return True
-        else: return False
+        else:
+            # print("verify member bytes to int compare error")
+            return False
     else:
+        # print("VRF verify error")
         return False
 
 
