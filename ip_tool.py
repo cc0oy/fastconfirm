@@ -13,8 +13,8 @@ i-034fe4304007793d1	54.171.162.71	172.31.14.61
 
 '''
 
-num_regions = 16
-N = 10
+num_regions = 1
+N = 4
 
 n = int(N / num_regions)
 r = N - num_regions * n
