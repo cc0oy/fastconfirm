@@ -4,7 +4,7 @@ from gevent import monkey;
 # from myexperiements.sockettest.x_d_node import XDNode
 # from myexperiements.sockettest.x_k_node import XDKNode
 # from myexperiements.sockettest.x_k_s_node import XDSNode
-
+from Client.make_random_tx import tx_generator
 from fastconfirm.fc_node import FastConfirmNode
 
 monkey.patch_all(thread=False)
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     addresses_node, my_address_node = network_config('hosts.config', N,i)
 
     # port communicated with client
-    addresses_client, my_address_client = network_config('host_client.config', N,i)
+    # addresses_client, my_address_client = network_config('host_client.config', N,i)
 
     # bft_from_server, server_to_bft = mpPipe(duplex=True)
     # client_from_bft, bft_to_client = mpPipe(duplex=True)
@@ -162,6 +162,10 @@ if __name__ == '__main__':
     server_app_mpq = mpQueue()
     bft_from_app = lambda: server_app_mpq.get(timeout=0.0001)
     bft_to_app = server_app_mpq.put_nowait
+    '''put some transactions initilly'''
+    for _ in range(25):
+        atx=tx_generator(250)
+        server_app_mpq.put_nowait(atx)
 
     client_ready = mpValue(c_bool, False)
     server_ready = mpValue(c_bool, False)
@@ -169,12 +173,12 @@ if __name__ == '__main__':
     stop = mpValue(c_bool, False)
 
     # TODO: communication channel to change in some way
-    net_listen = NetworkServer(my_address_client[1], my_address_client[0], i, addresses_client, bft_to_app,
-                               server_ready, stop)
+    # net_listen = NetworkServer(my_address_client[1], my_address_client[0], i, addresses_client, bft_to_app,
+    #                            server_ready, stop)
 
     start=time.time()
-    net_listen.start()
-    while time.time()-start<30:
+    # net_listen.start()
+    while time.time()-start<5:
         continue
     print("start consensus node")
     net_server = NetworkServer(my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, server_ready,

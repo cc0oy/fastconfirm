@@ -46,7 +46,6 @@ class FastConfirmNode(Fastconfirm):
                  debug=True):
         # self.sk, self.pks = load_key(os.getcwd() + '/keys_4test/', pid, N)
         self.sk, self.pks = load_key_pickle(pid, N)
-        print("test pk",self.pks[0]==self.pks[1])
         self.bft_from_server = bft_from_server
         self.bft_to_client = bft_to_client
         # self.bft_from_app=bft_from_app

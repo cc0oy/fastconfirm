@@ -422,7 +422,8 @@ class Fastconfirm:
             while True:
                 # print("node {} enter receive transactions loop".format(self.id))
                 try:
-                    _,atx = self._recv_txs()
+
+                    atx = self._recv_txs()
                     # print("node {} receive transaction {}".format(self.id,atx))
                     self.transaction_buffer.put_nowait(atx)
                 except Exception as e:
@@ -434,7 +435,7 @@ class Fastconfirm:
         self._recv_txs_thread.start()
 
 
-
+        print(self.id,"start consensus with txs:",self.transaction_buffer.qsize())
         while self.round <= self.SLOTS_NUM:
             # print(self.id,str(self.sPK2s[0].format()),str(self.sPK2s[1].format()),str(self.sPK2s[2].format()),str(self.sPK2s[3].format()))
             if self.round not in self._per_round_recv:
