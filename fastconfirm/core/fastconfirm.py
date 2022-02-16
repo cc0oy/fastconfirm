@@ -439,6 +439,7 @@ class Fastconfirm:
 
         print(self.id,"start consensus with txs:",self.transaction_buffer.qsize())
         while self.round <= self.SLOTS_NUM:
+            self.logger.info(self.id, "start consensus round:", self.round)
             # print(self.id,str(self.sPK2s[0].format()),str(self.sPK2s[1].format()),str(self.sPK2s[2].format()),str(self.sPK2s[3].format()))
             if self.round not in self._per_round_recv:
                 self._per_round_recv[self.round] = Queue()
