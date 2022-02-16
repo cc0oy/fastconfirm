@@ -380,12 +380,14 @@ class Fastconfirm:
                         tB = self._tobe_commit.get()
                         self.height += 1
                         print("output in round ", self.round, tB)
+                        self.logger.info("output in round ", self.round, tB)
                     self.height += 1
                     print("output in round ", self.round, B)
                     self.lastcommit = 1
                     self.lB = B
             else:
                 print("do not have commited block in round ", self.round)
+                self.logger.info("do not have commited block in round ", self.round)
                 self.lastcommit = 0
                 self._tobe_commit.put(B)
         self.round += 1
