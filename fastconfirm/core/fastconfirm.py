@@ -366,6 +366,7 @@ class Fastconfirm:
         # print(self.state)
 
         if self.round == 1:
+            self.logger.info("output round1 directly {}".format(self.round, B))
             print(B)
         else:
             (h_s, round_s, g_s) = self.state
@@ -373,6 +374,7 @@ class Fastconfirm:
                 if hash(self.lB) == B[0]:
                     self.height += 1
                     print("output in round ", self.round, B)
+                    self.logger.info("output1 in round {}: {}".format(self.round, B))
                     lastcommit = 1
                     lB = B
                 else:
@@ -380,14 +382,15 @@ class Fastconfirm:
                         tB = self._tobe_commit.get()
                         self.height += 1
                         print("output in round ", self.round, tB)
-                        self.logger.info("output in round ", self.round, tB)
+                        self.logger.info("output in round {}: {}".format(self.round,tB) )
                     self.height += 1
                     print("output in round ", self.round, B)
+                    self.logger.info("output2 in round {}: {}".format(self.round, B))
                     self.lastcommit = 1
                     self.lB = B
             else:
                 print("do not have commited block in round ", self.round)
-                self.logger.info("do not have commited block in round ", self.round)
+                self.logger.info("do not have committed block in round {}".format(self.round))
                 self.lastcommit = 0
                 self._tobe_commit.put(B)
         self.round += 1
@@ -439,7 +442,7 @@ class Fastconfirm:
 
         print(self.id,"start consensus with txs:",self.transaction_buffer.qsize())
         while self.round <= self.SLOTS_NUM:
-            self.logger.info(self.id, "start consensus round:", self.round)
+            self.logger.info("{} start consensus round: {}".format(self.id,self.round))
             # print(self.id,str(self.sPK2s[0].format()),str(self.sPK2s[1].format()),str(self.sPK2s[2].format()),str(self.sPK2s[3].format()))
             if self.round not in self._per_round_recv:
                 self._per_round_recv[self.round] = Queue()
