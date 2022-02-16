@@ -163,6 +163,7 @@ if __name__ == '__main__':
     bft_from_app = lambda: server_app_mpq.get(timeout=0.0001)
     bft_to_app = server_app_mpq.put_nowait
     '''put some transactions initilly'''
+    print("put txs 250 initially")
     for _ in range(25):
         atx=tx_generator(250)
         server_app_mpq.put_nowait(atx)
@@ -178,8 +179,8 @@ if __name__ == '__main__':
 
     start=time.time()
     # net_listen.start()
-    while time.time()-start<5:
-        continue
+    # while time.time()-start<0.1:
+    #     continue
     print("start consensus node")
     net_server = NetworkServer(my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, server_ready,
                                stop)
