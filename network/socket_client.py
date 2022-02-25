@@ -49,7 +49,7 @@ class NetworkClient (Process):
                         self.is_out_sock_connected[j] = self._connect(j)
                 if all(self.is_out_sock_connected):
                     with self.ready.get_lock():
-                        # print("get lock: {}".format(self.ready.get_lock))
+                        print("get lock: {}".format(self.ready.get_lock))
                         self.ready.value = True
                     break
             except Exception as e:
@@ -66,7 +66,7 @@ class NetworkClient (Process):
         try:
             # print("j={}".format(j))
             # print(self.addresses_list)
-            # print("{}:{} try to connect {}".format(self.ip,self.port+j+1,self.addresses_list[j]))
+            print("{}:{} try to connect {}".format(self.ip,self.port+j+1,self.addresses_list[j]))
             sock.connect(self.addresses_list[j])
             # print("out connect")
             self.socks[j] = sock

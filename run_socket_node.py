@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
     while not client_ready.value and not server_ready.value:
         time.sleep(1)
-        print("waiting for network ready...")
+        print("waiting for network ready with {} {}...".format(client_ready.value,server_ready.value))
 
     with net_ready.get_lock():
         net_ready.value = True
