@@ -41,7 +41,7 @@ class NetworkClient (Process):
     def _connect_and_send_forever(self):
         pid = os.getpid()
         self.logger.info('node %d\'s socket client starts to make outgoing connections on process id %d' % (self.id, pid))
-        print("socket client start to make outgoing connections")
+        print("socket client start to make outgoing connections with stop {}".format(self.stop.value))
         while not self.stop.value:
             try:
                 for j in range(self.N):
