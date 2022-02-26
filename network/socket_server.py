@@ -30,6 +30,7 @@ class NetworkServer (Process):
         super().__init__()
 
     def _listen_and_recv_forever(self):
+        print("listen and receive loop")
         pid = os.getpid()
         self.logger.info('node %d\'s socket server starts to listen ingoing connections on process id %d' % (self.id, pid))
         print("my IP is " + self.ip+":"+str(self.port))

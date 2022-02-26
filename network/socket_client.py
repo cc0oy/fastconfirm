@@ -47,6 +47,7 @@ class NetworkClient (Process):
                 for j in range(self.N):
                     # print("test")
                     if not self.is_out_sock_connected[j]:
+                        print("try to connect")
                         self.is_out_sock_connected[j] = self._connect(j)
                 if all(self.is_out_sock_connected):
                     with self.ready.get_lock():
@@ -61,6 +62,7 @@ class NetworkClient (Process):
         #gevent.joinall(send_threads)
 
     def _connect(self, j: int):
+        print("sock=socket.socket()")
         sock = socket.socket()
         print("try connect")
         # if self.ip == '127.0.0.1':

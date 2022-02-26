@@ -99,6 +99,7 @@ class Fastconfirm:
         :param mute:
         :param debug:
         '''
+        print("enter fastconfirm.py init function")
         self.sid = sid
         self.id = pid
         self.SLOTS_NUM = S
