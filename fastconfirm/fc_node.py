@@ -46,13 +46,16 @@ class FastConfirmNode(Fastconfirm):
                  debug=True):
         # self.sk, self.pks = load_key(os.getcwd() + '/keys_4test/', pid, N)
         self.sk, self.pks = load_key_pickle(pid, N)
+        print("end load keys")
         self.bft_from_server = bft_from_server
         self.bft_to_client = bft_to_client
+        print()
         # self.bft_from_app=bft_from_app
         self.ready = ready
         self.stop = stop
         self.debug = debug
         self.mempool = bft_from_app
+        print("consensus initialize")
         Fastconfirm.__init__(self, sid, pid, S, B, N, f, self.pks, self.sk, send=None, recv=None, recv_txs=None, K=3,
                              mute=False,
                              debug=False)

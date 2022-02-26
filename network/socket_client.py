@@ -61,7 +61,9 @@ class NetworkClient (Process):
 
     def _connect(self, j: int):
         sock = socket.socket()
-        if self.ip == '127.0.0.1':
+        # if self.ip == '127.0.0.1':
+        if self.ip==self.ip:
+            print("sock bind {}:{}".format(self.ip,self.port+j+1))
             sock.bind((self.ip, self.port + j + 1))
         try:
             # print("j={}".format(j))
