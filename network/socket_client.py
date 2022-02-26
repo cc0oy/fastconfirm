@@ -41,6 +41,7 @@ class NetworkClient (Process):
     def _connect_and_send_forever(self):
         pid = os.getpid()
         self.logger.info('node %d\'s socket client starts to make outgoing connections on process id %d' % (self.id, pid))
+        print("socket client start to make outgoing connections")
         while not self.stop.value:
             try:
                 for j in range(self.N):
@@ -61,6 +62,7 @@ class NetworkClient (Process):
 
     def _connect(self, j: int):
         sock = socket.socket()
+        print("try connect")
         # if self.ip == '127.0.0.1':
         if self.ip==self.ip:
             print("sock bind {}:{}".format(self.ip,self.port+j+1))
@@ -77,6 +79,7 @@ class NetworkClient (Process):
             return False
 
     def _send(self, j: int):
+        print("send")
         while not self.stop.value:
             #gevent.sleep(0)
             #self.sock_locks[j].acquire()
@@ -93,6 +96,7 @@ class NetworkClient (Process):
 
     ##
     def _handle_send_loop(self):
+        print("handle")
         while not self.stop.value:
             try:
 
@@ -121,6 +125,7 @@ class NetworkClient (Process):
         #print("sending loop quits ...")
 
     def run(self):
+        print("run")
         self.logger = self._set_client_logger(self.id)
         pid = os.getpid()
         self.logger.info('node id %d is running on pid %d' % (self.id, pid))
@@ -134,7 +139,7 @@ class NetworkClient (Process):
             self.stop.value = True
 
     def _set_client_logger(self, id: int):
-        logger = logging.getLogger("node-" + str(id))
+        logger = logging.getLogger("node-net-client" + str(id))
         logger.setLevel(logging.DEBUG)
         # logger.setLevel(logging.INFO)
         formatter = logging.Formatter(

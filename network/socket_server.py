@@ -63,6 +63,7 @@ class NetworkServer (Process):
 
 
     def run(self):
+        print("socket server run")
         pid = os.getpid()
         self.logger = self._set_server_logger(self.id)
         self.logger.info('node id %d is running on pid %d' % (self.id, pid))
@@ -71,13 +72,14 @@ class NetworkServer (Process):
         self._listen_and_recv_forever()
 
     def _address_to_id(self, address: tuple):
+        print("socket server add2id")
         for i in range(self.N):
             if address[0] != '127.0.0.1' and address[0] == self.addresses_list[i][0]:
                 return i
         return int((address[1] - 10000) / 200)
 
     def _set_server_logger(self, id: int):
-        logger = logging.getLogger("node-" + str(id))
+        logger = logging.getLogger("node-net-server" + str(id))
         logger.setLevel(logging.DEBUG)
         # logger.setLevel(logging.INFO)
         formatter = logging.Formatter(
