@@ -70,6 +70,7 @@ class NetworkServer (Process):
         self.logger.info('node id %d is running on pid %d' % (self.id, pid))
         with self.ready.get_lock():
             self.ready.value = False
+        self.ready.value=True
         self._listen_and_recv_forever()
 
     def _address_to_id(self, address: tuple):

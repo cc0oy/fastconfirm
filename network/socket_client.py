@@ -43,20 +43,21 @@ class NetworkClient (Process):
         self.logger.info('node %d\'s socket client starts to make outgoing connections on process id %d' % (self.id, pid))
         print("socket client start to make outgoing connections with stop {}".format(self.stop.value))
         while not self.stop.value:
+            self.logger.info('node %d\'s socket client can enter loop'%(self.id))
             try:
                 for j in range(self.N):
                     # print("test")
                     if not self.is_out_sock_connected[j]:
-                        print("try to connect")
+                        self.logger.info("try to connect")
                         self.is_out_sock_connected[j] = self._connect(j)
                 if all(self.is_out_sock_connected):
                     with self.ready.get_lock():
-                        print("get lock: {}".format(self.ready.get_lock))
+                        self.logger.info("get lock: {}".format(self.ready.get_lock))
                         self.ready.value = True
                     break
             except Exception as e:
                 print(str((e, traceback.print_exc())))
-                # self.logger.info(str((e, traceback.print_exc())))
+                self.logger.info(str((e, traceback.print_exc())))
         send_threads = [gevent.spawn(self._send, j) for j in range(self.N)]
         self._handle_send_loop()
         #gevent.joinall(send_threads)
