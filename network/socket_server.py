@@ -33,7 +33,7 @@ class NetworkServer (Process):
         print("listen and receive loop")
         pid = os.getpid()
         self.logger.info('node %d\'s socket server starts to listen ingoing connections on process id %d' % (self.id, pid))
-        print("my IP is " + self.ip+":"+str(self.port))
+        self.logger.info("my IP is " + self.ip+":"+str(self.port))
 
         def _handler(sock, address):
             jid = self._address_to_id(address)
@@ -49,7 +49,7 @@ class NetworkServer (Process):
                             (j, o) = (jid, pickle.loads(data))
                             # assert j in range(self.N)
                             self.server_to_bft((j, o))
-                            # self.logger.info('recv' + str((j, o)))
+                            self.logger.info('recv' + str((j, o)))
                             # print('recv' + str((j, o)))
                         else:
                             self.logger.error('syntax error messages')
