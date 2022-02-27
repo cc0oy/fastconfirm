@@ -435,9 +435,9 @@ class Fastconfirm:
                 try:
 
                     atx = self._recv_txs()
-                    print("node {} receive transaction {}".format(self.id,atx))
+                    # print("node {} receive transaction {}".format(self.id,atx))
                     self.transaction_buffer.put_nowait(atx)
-                    print("now transaction buffer size {}".format(self.transaction_buffer.qsize()))
+                    # print("now transaction buffer size {}".format(self.transaction_buffer.qsize()))
                 except Exception as e:
                     # print(str(self.id)+":"+str((e,traceback.print_exc())))
                     # print("node {} receive txs message error".format(self.id))

@@ -65,9 +65,10 @@ class NetworkClient (Process):
     def _connect(self, j: int):
         print("sock=socket.socket()")
         sock = socket.socket()
+        self.logger.info("sock bind {}:{}".format(self.ip, self.port + j + 1))
         print("try connect")
-        # if self.ip == '127.0.0.1':
-        if self.ip==self.ip:
+        if self.ip == '127.0.0.1':
+        # if self.ip==self.ip:
             print("sock bind {}:{}".format(self.ip,self.port+j+1))
             sock.bind((self.ip, self.port + j + 1))
         try:
@@ -88,7 +89,7 @@ class NetworkClient (Process):
             #self.sock_locks[j].acquire()
             o = self.sock_queues[j].get()
             try:
-                # print("send a message in socket: {}".format(o))
+                print("send a message in socket: {}".format(o))
                 self.socks[j].sendall(pickle.dumps(o) + self.SEP)
             except:
                 self.logger.error("fail to send msg")
