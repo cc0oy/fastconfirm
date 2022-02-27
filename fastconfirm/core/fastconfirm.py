@@ -145,7 +145,7 @@ class Fastconfirm:
         '''put 25 transactions initially'''
         for _ in range(25):
             atx = tx_generator(250)
-            self.transaction_buffer.append(atx)
+            self.transaction_buffer.put_nowait(atx)
         # print("have put {} txs".format(server_app_mpq.qsize()))
 
 
