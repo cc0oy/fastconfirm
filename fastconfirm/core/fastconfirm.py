@@ -189,7 +189,7 @@ class Fastconfirm:
                 :param k: Node to send.
                 :param o: Value to send.
                 """
-                # print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
+                print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
                 self._send(k, ('F_BP', r, o))
 
             return bp_send
