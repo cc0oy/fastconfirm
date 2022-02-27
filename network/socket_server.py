@@ -65,7 +65,7 @@ class NetworkServer (Process):
             self.streamServer = StreamServer((self.ip, self.port), _handler)
             self.streamServer.serve_forever()
         except Exception as e1:
-            self.logger.error(str((e, traceback.print_exc())))
+            self.logger.error(str((e1, traceback.print_exc())))
 
 
     def run(self):
