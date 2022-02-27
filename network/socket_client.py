@@ -80,6 +80,7 @@ class NetworkClient (Process):
             # print("{}:{} try to connect {}".format(self.ip,self.port+j+1,self.addresses_list[j]))
             self.logger.info("{}:{} try to connect {}".format(self.ip, self.port + j + 1, self.addresses_list[j]))
             sock.connect(self.addresses_list[j])
+            self.logger.info("jump out from sock.connect")
             # print("out connect")
             self.socks[j] = sock
             return True
