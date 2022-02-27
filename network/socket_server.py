@@ -62,8 +62,11 @@ class NetworkServer (Process):
                 self.logger.error(str((e, traceback.print_exc())))
 
         try:
+            self.logger.debug("stream server1")
             self.streamServer = StreamServer((self.ip, self.port), _handler)
+            self.logger.debug("stream server2")
             self.streamServer.serve_forever()
+            self.logger.debug("stream server3")
         except Exception as e1:
             self.logger.error(str((e1, traceback.print_exc())))
 
