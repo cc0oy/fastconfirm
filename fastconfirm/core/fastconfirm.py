@@ -223,8 +223,7 @@ class Fastconfirm:
             while bp_recvs.qsize() > 0:
                 gevent.sleep(0)
                 sender, (g, h, pi, B, hB, height, sig) = bp_recvs.get()
-                # print(sender, (g, h, pi, B, hB, height, sig))
-
+                print(sender, (g, h, pi, B, hB, height, sig))
                 if lg == 2 or (lg == 1 and self.lastcommit == 1):
                     if g == 0:
                         continue
