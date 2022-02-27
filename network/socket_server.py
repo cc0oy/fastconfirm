@@ -38,7 +38,9 @@ class NetworkServer (Process):
         def _handler(sock, address):
             jid = self._address_to_id(address)
             buf = b''
+            self.logger.debug("handle enter")
             try:
+                self.logger.debug("handle enter and stopvalue is {}".format(self.stop.value))
                 while not self.stop.value:
                     buf += sock.recv(9000)
                     tmp = buf.split(self.SEP, 1)
@@ -74,9 +76,11 @@ class NetworkServer (Process):
         self._listen_and_recv_forever()
 
     def _address_to_id(self, address: tuple):
-        print("socket server add2id")
+        self.logger.info("socket server add2id start")
         for i in range(self.N):
+            self.logger.debug("loop enter")
             if address[0] != '127.0.0.1' and address[0] == self.addresses_list[i][0]:
+                self.logger.debug("if enter")
                 return i
         return int((address[1] - 10000) / 200)
 
