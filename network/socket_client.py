@@ -69,17 +69,19 @@ class NetworkClient (Process):
         print("try connect")
         if self.ip == '127.0.0.1':
         # if self.ip==self.ip:
-            print("sock bind {}:{}".format(self.ip,self.port+j+1))
+            print("if self.ip sock bind {}:{}".format(self.ip,self.port+j+1))
             sock.bind((self.ip, self.port + j + 1))
         try:
             # print("j={}".format(j))
             # print(self.addresses_list)
-            print("{}:{} try to connect {}".format(self.ip,self.port+j+1,self.addresses_list[j]))
+            # print("{}:{} try to connect {}".format(self.ip,self.port+j+1,self.addresses_list[j]))
+            self.logger.info("{}:{} try to connect {}".format(self.ip, self.port + j + 1, self.addresses_list[j]))
             sock.connect(self.addresses_list[j])
             # print("out connect")
             self.socks[j] = sock
             return True
         except Exception as e1:
+            self.logger.error(str((e1, traceback.print_exc())))
             return False
 
     def _send(self, j: int):
@@ -90,6 +92,7 @@ class NetworkClient (Process):
             o = self.sock_queues[j].get()
             try:
                 print("send a message in socket: {}".format(o))
+                self.logger.info("send a message in socket: {}".format(o))
                 self.socks[j].sendall(pickle.dumps(o) + self.SEP)
             except:
                 self.logger.error("fail to send msg")
@@ -100,7 +103,7 @@ class NetworkClient (Process):
 
     ##
     def _handle_send_loop(self):
-        print("handle")
+        self.logger.debug("handle send loop start")
         while not self.stop.value:
             try:
 
@@ -108,7 +111,7 @@ class NetworkClient (Process):
                 # print("handle send loop:({}, {})".format(j,o))
                 #o = self.send_queue[j].get_nowait()
 
-                #self.logger.info('send' + str((j, o)))
+                self.logger.info('send' + str((j, o)))
                 try:
                     #self._send(j, pickle.dumps(o))
                     if j == -1: # -1 means broadcast
