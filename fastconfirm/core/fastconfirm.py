@@ -213,7 +213,7 @@ class Fastconfirm:
 
             return vote_send
 
-        delta = 0.2
+        delta = 1
         start = time.time()
         t, my_pi, my_h = memselection(self.round, 2, self.sPK2s[self.id], self.sSK2)
         if t == 1:
@@ -225,7 +225,7 @@ class Fastconfirm:
             leader_msg = None
             while time.time() - start < delta:
                 gevent.sleep(0)
-                print(bp_recvs.qsize())
+            print("bp size test",bp_recvs.qsize())
             while bp_recvs.qsize() > 0:
                 gevent.sleep(0)
                 sender, (g, h, pi, B, hB, height, sig) = bp_recvs.get()
@@ -414,7 +414,7 @@ class Fastconfirm:
                 try:
                     sender, (tag, r, msg) = self._recv()
                     # print('recv '+tag+str((sender, r, msg)))
-                    # print("round",r,":node",self.id,"recv",tag,"from",sender)
+                    print("round",r,":node",self.id,"recv",tag,"from",sender)
                     # Maintain an *unbounded* recv queue for each epoch
                     if r not in self._per_round_recv:
                         self._per_round_recv[r] = Queue()
