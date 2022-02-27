@@ -23,6 +23,7 @@ def vote(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, leadermsg, send
     # print("--", pid, h, pi)
     if t == 1:
         # print(pid, "is select in vote!")
+        print("see what leadermsg is: {}".format(leadermsg))
         (g, hl, pil, B, hB, height, sig) = leadermsg
 
         if g > 0:
