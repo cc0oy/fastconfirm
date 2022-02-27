@@ -142,6 +142,12 @@ class Fastconfirm:
         self.rmt = None
 
         self._per_round_recv = {}
+        '''put 25 transactions initially'''
+        for _ in range(25):
+            atx = tx_generator(250)
+            self.transaction_buffer.append(atx)
+        # print("have put {} txs".format(server_app_mpq.qsize()))
+
 
     def submit_tx(self,tx):
         self.transaction_buffer.append(tx)
