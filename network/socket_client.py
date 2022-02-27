@@ -50,6 +50,8 @@ class NetworkClient (Process):
                     if not self.is_out_sock_connected[j]:
                         self.logger.info("try to connect")
                         self.is_out_sock_connected[j] = self._connect(j)
+                        self.logger.info("is out sock connect {} result {}".format(j,self.is_out_sock_connected[j]))
+                self.logger.debug("all connect {}".format(all(self.is_out_sock_connected)))
                 if all(self.is_out_sock_connected):
                     with self.ready.get_lock():
                         self.logger.info("get lock: {}".format(self.ready.get_lock))
@@ -59,6 +61,7 @@ class NetworkClient (Process):
                 print(str((e, traceback.print_exc())))
                 self.logger.info(str((e, traceback.print_exc())))
         send_threads = [gevent.spawn(self._send, j) for j in range(self.N)]
+        self.logger.debug("invoke handle send loop")
         self._handle_send_loop()
         #gevent.joinall(send_threads)
 
