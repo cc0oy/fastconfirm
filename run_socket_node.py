@@ -167,6 +167,7 @@ if __name__ == '__main__':
     for _ in range(25):
         atx=tx_generator(250)
         server_app_mpq.put_nowait(atx)
+    print("have put {} txs".format(server_app_mpq.qsize()))
 
     client_ready = mpValue(c_bool, False)
     server_ready = mpValue(c_bool, False)
