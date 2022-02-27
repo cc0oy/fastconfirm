@@ -225,7 +225,7 @@ class Fastconfirm:
             leader_msg = None
             while time.time() - start < delta:
                 gevent.sleep(0)
-                # print(bp_recvs.qsize())
+                print(bp_recvs.qsize())
             while bp_recvs.qsize() > 0:
                 gevent.sleep(0)
                 sender, (g, h, pi, B, hB, height, sig) = bp_recvs.get()
