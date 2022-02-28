@@ -34,6 +34,7 @@ def commit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, o, omega, c_hB, send, l
         # print(pid, "is select in pre-commit!")
         # print("message data type:{}, {}, {}, {}, {}, {}, {}, {}".format(type(o),type(my_h),type(my_pi),type(c_hB),type(omega),type(sig),type(rpk[position].format()),type(rmt[1])))
         msg = (o, my_h, my_pi, c_hB, str(omega), sig, rpk[position].format(), rmt[1])
+        # print("msg is:",str(omega),"omega itself:",omega)
         commit_broadcast(msg)
         # print(pid, "sends", msg)
         return 1

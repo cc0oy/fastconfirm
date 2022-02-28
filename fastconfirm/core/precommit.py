@@ -8,6 +8,17 @@ from fastconfirm.core.roundkey import sign
 def hash(x):
     return hashlib.sha256(pickle.dumps(x)).digest()
 
+def queue2list(fromq):
+    num=fromq.qsize()
+    tol=[]
+    for i in range(num):
+        element=fromq.get()
+        tol.append(element)
+        fromq.put_nowait(element)
+    return tol
+
+
+
 
 def precommit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, c, pc_hB, voteset,send, logger=None):
     # lB means the block on the self.height
@@ -28,8 +39,10 @@ def precommit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, c, pc_hB, 
 
         if c > 0:
             position = ((round - 1) * 4) + 2
+            votelist=queue2list(voteset)
+            # votelist=str(voteset)
             sig = sign(rsk[position], str(pc_hB), rmt, position)
-            msg = (1, h, pi, pc_hB,voteset, sig)
+            msg = (1, h, pi, pc_hB,votelist, sig)
 
         if c == 0:
             # not a valid C
@@ -38,7 +51,7 @@ def precommit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, c, pc_hB, 
             msg = (0, h, pi, None, None,sig)
 
         pre_broadcast(msg)
-        # print(pid, "sends", msg)
+        print("precommits sends in round", round)
         return 1
     else:
         # print(pid, "is not selected as a committee member")

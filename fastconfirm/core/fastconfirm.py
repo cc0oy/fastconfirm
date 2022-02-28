@@ -323,7 +323,7 @@ class Fastconfirm:
             gevent.sleep(0)
             sender, (g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
 
-            if vrifymember(self.round, 3, h, pi, self.sPK2s[sender]) and vote_set.qsize>=2*self.f+1:
+            if vrifymember(self.round, 3, h, pi, self.sPK2s[sender]) and len(vote_set)>=2*self.f+1:
                 (s, b) = sig
                 # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
                 preset[pc_hB].put((sender, h, pi, sig))
