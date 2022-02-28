@@ -41,7 +41,7 @@ class NetworkServer (Process):
             buf = b''
             # self.logger.debug("handle enter")
             try:
-                self.logger.debug("handle enter and stopvalue is {}".format(self.stop.value))
+                # self.logger.debug("handle enter and stopvalue is {}".format(self.stop.value))
                 while not self.stop.value:
                     buf += sock.recv(9000)
                     tmp = buf.split(self.SEP, 1)
@@ -52,8 +52,8 @@ class NetworkServer (Process):
                             (j, o) = (jid, pickle.loads(data))
                             # assert j in range(self.N)
                             self.server_to_bft((j, o))
-                            self.logger.info('recv' + str((j, o)))
-                            # print('recv' + str((j, o)))
+                            # self.logger.info('recv' + str((j, o)))
+                            print('recv' + str((j, o)))
                         else:
                             self.logger.error('syntax error messages')
                             raise ValueError
@@ -63,7 +63,7 @@ class NetworkServer (Process):
                 self.logger.error(str((e, traceback.print_exc())))
 
         self.streamServer = StreamServer((self.ip, self.port), _handler)
-        self.logger.info("invoke streamServer with ({},{}) start? {} object {}".format(self.ip,self.port,self.streamServer.started,type(self.streamServer)))
+        # self.logger.info("invoke streamServer with ({},{}) start? {} object {}".format(self.ip,self.port,self.streamServer.started,type(self.streamServer)))
 
         try:
             self.streamServer.serve_forever()
@@ -82,11 +82,11 @@ class NetworkServer (Process):
         self._listen_and_recv_forever()
 
     def _address_to_id(self, address: tuple):
-        self.logger.info("socket server add2id start")
+        # self.logger.info("socket server add2id start")
         for i in range(self.N):
-            self.logger.debug("loop enter")
+            # self.logger.debug("loop enter")
             if address[0] != '127.0.0.1' and address[0] == self.addresses_list[i][0]:
-                self.logger.debug("if enter")
+                # self.logger.debug("if enter")
                 return i
         return int((address[1] - 10000) / 200)
 

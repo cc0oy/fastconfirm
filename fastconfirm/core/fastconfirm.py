@@ -99,7 +99,7 @@ class Fastconfirm:
         :param mute:
         :param debug:
         '''
-        print("enter fastconfirm.py init function")
+        # print("enter fastconfirm.py init function")
         self.sid = sid
         self.id = pid
         self.SLOTS_NUM = S
@@ -225,7 +225,7 @@ class Fastconfirm:
             leader_msg = None
             while time.time() - start < delta:
                 gevent.sleep(0)
-            print("bp size test",bp_recvs.qsize())
+            # print("bp size test",bp_recvs.qsize())
             while bp_recvs.qsize() > 0:
                 gevent.sleep(0)
                 sender, (g, h, pi, B, hB, height, sig) = bp_recvs.get()
@@ -380,7 +380,7 @@ class Fastconfirm:
                 if hash(self.lB) == B[0]:
                     self.height += 1
                     print("output in round ", self.round, B)
-                    self.logger.info("output1 in round {}: {}".format(self.round, B))
+                    self.logger.info("commit in round {}: {}".format(self.round, B))
                     lastcommit = 1
                     lB = B
                 else:
@@ -388,10 +388,10 @@ class Fastconfirm:
                         tB = self._tobe_commit.get()
                         self.height += 1
                         print("output in round ", self.round, tB)
-                        self.logger.info("output in round {}: {}".format(self.round,tB) )
+                        self.logger.info("commit in round {}: {}".format(self.round,tB) )
                     self.height += 1
                     print("output in round ", self.round, B)
-                    self.logger.info("output2 in round {}: {}".format(self.round, B))
+                    self.logger.info("commit in round {}: {}".format(self.round, B))
                     self.lastcommit = 1
                     self.lB = B
             else:

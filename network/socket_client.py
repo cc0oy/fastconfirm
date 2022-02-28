@@ -43,14 +43,14 @@ class NetworkClient (Process):
         self.logger.info('node %d\'s socket client starts to make outgoing connections on process id %d' % (self.id, pid))
         print("socket client start to make outgoing connections with stop {}".format(self.stop.value))
         while not self.stop.value:
-            self.logger.info('node %d\'s socket client can enter loop'%(self.id))
+            # self.logger.info('node %d\'s socket client can enter loop'%(self.id))
             try:
                 for j in range(self.N):
                     # print("test")
                     if not self.is_out_sock_connected[j]:
-                        self.logger.info("try to connect")
+                        # self.logger.info("try to connect")
                         self.is_out_sock_connected[j] = self._connect(j)
-                        self.logger.info("is out sock connect {} result {}".format(j,self.is_out_sock_connected[j]))
+                        # self.logger.info("is out sock connect {} result {}".format(j,self.is_out_sock_connected[j]))
                 self.logger.debug("all connect {}".format(all(self.is_out_sock_connected)))
                 if all(self.is_out_sock_connected):
                     with self.ready.get_lock():
@@ -61,15 +61,15 @@ class NetworkClient (Process):
                 print(str((e, traceback.print_exc())))
                 self.logger.info(str((e, traceback.print_exc())))
         send_threads = [gevent.spawn(self._send, j) for j in range(self.N)]
-        self.logger.debug("invoke handle send loop")
+        # self.logger.debug("invoke handle send loop")
         self._handle_send_loop()
         #gevent.joinall(send_threads)
 
     def _connect(self, j: int):
         print("sock=socket.socket()")
         sock = socket.socket()
-        self.logger.info("sock bind {}:{}".format(self.ip, self.port + j + 1))
-        print("try connect")
+        # self.logger.info("sock bind {}:{}".format(self.ip, self.port + j + 1))
+        # print("try connect")
         if self.ip == '127.0.0.1':
         # if self.ip==self.ip:
             print("if self.ip sock bind {}:{}".format(self.ip,self.port+j+1))
@@ -78,9 +78,9 @@ class NetworkClient (Process):
             # print("j={}".format(j))
             # print(self.addresses_list)
             # print("{}:{} try to connect {}".format(self.ip,self.port+j+1,self.addresses_list[j]))
-            self.logger.info("{}:{} try to connect {}".format(self.ip, self.port + j + 1, self.addresses_list[j]))
+            # self.logger.info("{}:{} try to connect {}".format(self.ip, self.port + j + 1, self.addresses_list[j]))
             sock.connect(self.addresses_list[j])
-            self.logger.info("jump out from sock.connect")
+            # self.logger.info("jump out from sock.connect")
             # print("out connect")
             self.socks[j] = sock
             return True
@@ -89,14 +89,14 @@ class NetworkClient (Process):
             return False
 
     def _send(self, j: int):
-        print("send")
+        # print("send")
         while not self.stop.value:
             #gevent.sleep(0)
             #self.sock_locks[j].acquire()
             o = self.sock_queues[j].get()
             try:
                 print("send a message in socket: {}".format(o))
-                self.logger.info("send a message in socket: {}".format(o))
+                # self.logger.info("send a message in socket: {}".format(o))
                 self.socks[j].sendall(pickle.dumps(o) + self.SEP)
             except:
                 self.logger.error("fail to send msg")
@@ -107,7 +107,7 @@ class NetworkClient (Process):
 
     ##
     def _handle_send_loop(self):
-        self.logger.debug("handle send loop start")
+        # self.logger.debug("handle send loop start")
         while not self.stop.value:
             try:
 
@@ -115,7 +115,7 @@ class NetworkClient (Process):
                 # print("handle send loop:({}, {})".format(j,o))
                 #o = self.send_queue[j].get_nowait()
 
-                self.logger.info('send' + str((j, o)))
+                # self.logger.info('send' + str((j, o)))
                 try:
                     #self._send(j, pickle.dumps(o))
                     if j == -1: # -1 means broadcast
@@ -136,7 +136,7 @@ class NetworkClient (Process):
         #print("sending loop quits ...")
 
     def run(self):
-        print("run")
+        # print("run")
         self.logger = self._set_client_logger(self.id)
         pid = os.getpid()
         self.logger.info('node id %d is running on pid %d' % (self.id, pid))
