@@ -10,17 +10,17 @@ from fastconfirm.core.fastconfirm import Fastconfirm
 def load_key_pickle(id,N):
     pk=[]
     for i in range(N):
-        with open(os.getcwd() + '/keys/' + 'sPK2-'+str(i)+'.key', 'rb') as fp:
+        with open(os.getcwd() + '/keys-1000/' + 'sPK2-'+str(i)+'.key', 'rb') as fp:
             # sPK = pickle.load(fp)
             pk.append(PublicKey(pickle.load(fp)))
 
-    with open(os.getcwd() + '/keys/' + 'ePK.key', 'rb') as fp:
+    with open(os.getcwd() + '/keys-1000/' + 'ePK.key', 'rb') as fp:
         ePK = pickle.load(fp)
 
-    with open(os.getcwd() + '/keys/' + 'sSK2-' + str(id) + '.key', 'rb') as fp:
+    with open(os.getcwd() + '/keys-1000/' + 'sSK2-' + str(id) + '.key', 'rb') as fp:
         sSK = PrivateKey(pickle.load(fp))
 
-    with open(os.getcwd() + '/keys/' + 'eSK-' + str(id) + '.key', 'rb') as fp:
+    with open(os.getcwd() + '/keys-1000/' + 'eSK-' + str(id) + '.key', 'rb') as fp:
         eSK = pickle.load(fp)
     print("node",id,"read keys",type(pk[0]),type(sSK))
     return sSK,pk

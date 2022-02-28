@@ -70,7 +70,8 @@ class Client(Process):
         # for i in range(perport):
         print("enter connect")
         sock = socket.socket()
-        if self.ip == '127.0.0.1':
+        # if self.ip == '127.0.0.1':
+        if self.ip==self.ip:
             print("the {}-th port to bft {} try to bind port {}".format(ith, j, self.port_base + j * perport + ith))
             try:
                 sock.bind((self.ip, self.port_base + j * perport + ith))
