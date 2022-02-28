@@ -57,7 +57,7 @@ def instantiate_bft_node(sid, i, S,B, N, f, K, T, bft_from_server: Callable, bft
     # elif protocol == 'xs':
     #     bft = XDSNode(sid, i, S, T, B, F, N, f, bft_from_server, bft_to_client, ready, stop, K, mute=mute)
     if protocol == 'fc':
-        bft = FastConfirmNode(sid, i, S, B, N, f, bft_from_server, bft_to_client, bft_from_app, ready, stop, K,
+        bft = FastConfirmNode(sid, i, T,S, B, N, f, bft_from_server, bft_to_client, bft_from_app, ready, stop, K,
                               mute)
     else:
         print("Only support dumbo or sdumbo or mule or hotstuff")

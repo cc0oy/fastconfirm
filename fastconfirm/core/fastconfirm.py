@@ -80,7 +80,7 @@ def broadcast_receiver_loop(recv_func, recv_queues):
 
 
 class Fastconfirm:
-    def __init__(self, sid, pid, S, B, N, f, sPK2s, sSK2, send, recv,recv_txs,K, mute=False,
+    def __init__(self, sid, pid, T,S, B, N, f, sPK2s, sSK2, send, recv,recv_txs,K, mute=False,
                  debug=True):
         '''
 
@@ -115,6 +115,7 @@ class Fastconfirm:
         # self.output_list = defaultdict(lambda: Queue())
 
         self.K = K
+        self.T=T
         self.B=B
         self.debug = debug
 
@@ -208,12 +209,12 @@ class Fastconfirm:
                 :param k: Node to send.
                 :param o: Value to send.
                 """
-                # print("node", pid, "is sending", o[0], "to node", k, "with the round", r)
+                print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
                 self._send(k, ('F_VOTE', r, o))
 
             return vote_send
 
-        delta = 1
+        delta = self.T
         start = time.time()
         t, my_pi, my_h = memselection(self.round, 2, self.sPK2s[self.id], self.sSK2)
         if t == 1:

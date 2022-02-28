@@ -42,7 +42,7 @@ def load_key(filepath, id, N):
 
 class FastConfirmNode(Fastconfirm):
 
-    def __init__(self, sid, pid, S, B, N, f, bft_from_server, bft_to_client, bft_from_app, ready, stop, K, mute=False,
+    def __init__(self, sid, pid,T, S, B, N, f, bft_from_server, bft_to_client, bft_from_app, ready, stop, K, mute=False,
                  debug=True):
         # self.sk, self.pks = load_key(os.getcwd() + '/keys_4test/', pid, N)
         self.sk, self.pks = load_key_pickle(pid, N)
@@ -56,7 +56,7 @@ class FastConfirmNode(Fastconfirm):
         self.debug = debug
         self.mempool = bft_from_app
         print("consensus initialize")
-        Fastconfirm.__init__(self, sid, pid, S, B, N, f, self.pks, self.sk, send=None, recv=None, recv_txs=None, K=3,
+        Fastconfirm.__init__(self, sid, pid, T,S, B, N, f, self.pks, self.sk, send=None, recv=None, recv_txs=None, K=3,
                              mute=False,
                              debug=False)
 
