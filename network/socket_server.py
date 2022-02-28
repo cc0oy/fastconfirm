@@ -62,8 +62,8 @@ class NetworkServer (Process):
             except Exception as e:
                 self.logger.error(str((e, traceback.print_exc())))
 
-        self.streamServer = StreamServer((self.ip, self.port), _handler).serve_forever()
-        self.logger.info("invoke streamServer with ({},{}) object {}".format(self.ip,self.port,type(self.streamServer)))
+        self.streamServer = StreamServer((self.ip, self.port), _handler)
+        self.logger.info("invoke streamServer with ({},{}) start? {} object {}".format(self.ip,self.port,self.streamServer.started,type(self.streamServer)))
 
         try:
             self.streamServer.serve_forever()
