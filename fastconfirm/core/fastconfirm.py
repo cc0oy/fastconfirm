@@ -290,7 +290,7 @@ class Fastconfirm:
             else:
                 print("not valid vote set")
             precommit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
-                      self.round, t, my_pi, my_h, c, pc_hB,
+                      self.round, t, my_pi, my_h, c, pc_hB,voteset[pc_hB],
                       make_pc_send(self.round))
         else:
             while time.time() - start < delta:
@@ -321,9 +321,9 @@ class Fastconfirm:
             gevent.sleep(0)
         while pc_recvs.qsize() > 0:
             gevent.sleep(0)
-            sender, (g, h, pi, pc_hB, sig) = pc_recvs.get()
+            sender, (g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
 
-            if vrifymember(self.round, 3, h, pi, self.sPK2s[sender]):
+            if vrifymember(self.round, 3, h, pi, self.sPK2s[sender]) and vote_set.qsize>=2*self.f+1:
                 (s, b) = sig
                 # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
                 preset[pc_hB].put((sender, h, pi, sig))

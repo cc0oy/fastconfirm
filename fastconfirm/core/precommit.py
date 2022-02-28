@@ -9,7 +9,7 @@ def hash(x):
     return hashlib.sha256(pickle.dumps(x)).digest()
 
 
-def precommit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, c, pc_hB, send, logger=None):
+def precommit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, c, pc_hB, voteset,send, logger=None):
     # lB means the block on the self.height
 
     def pre_broadcast(o):
@@ -29,13 +29,13 @@ def precommit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, c, pc_hB, 
         if c > 0:
             position = ((round - 1) * 4) + 2
             sig = sign(rsk[position], str(pc_hB), rmt, position)
-            msg = (1, h, pi, pc_hB, sig)
+            msg = (1, h, pi, pc_hB,voteset, sig)
 
         if c == 0:
             # not a valid C
             position = ((round - 1) * 4) + 2
             sig = sign(rsk[position], "null", rmt, position)
-            msg = (0, h, pi, None, sig)
+            msg = (0, h, pi, None, None,sig)
 
         pre_broadcast(msg)
         # print(pid, "sends", msg)
