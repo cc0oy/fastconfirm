@@ -61,18 +61,16 @@ class NetworkServer (Process):
             except Exception as e:
                 self.logger.error(str((e, traceback.print_exc())))
 
+
+        self.streamServer = StreamServer((self.ip, self.port), _handler)
         try:
-            self.logger.debug("stream server1")
-            self.streamServer = StreamServer((self.ip, self.port), _handler)
-            self.logger.debug("stream server2")
             self.streamServer.serve_forever()
-            self.logger.debug("stream server3")
         except Exception as e1:
-            self.logger.error(str((e1, traceback.print_exc())))
+            self.logger.debug(str((e1, traceback.print_exc())))
 
 
     def run(self):
-        print("socket server run")
+        # print("socket sever run")
         pid = os.getpid()
         self.logger = self._set_server_logger(self.id)
         self.logger.info('node id %d is running on pid %d' % (self.id, pid))
