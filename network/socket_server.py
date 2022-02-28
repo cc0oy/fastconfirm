@@ -36,9 +36,10 @@ class NetworkServer (Process):
         self.logger.info("my IP is " + self.ip+":"+str(self.port))
 
         def _handler(sock, address):
+            self.logger.debug("handle enter")
             jid = self._address_to_id(address)
             buf = b''
-            self.logger.debug("handle enter")
+            # self.logger.debug("handle enter")
             try:
                 self.logger.debug("handle enter and stopvalue is {}".format(self.stop.value))
                 while not self.stop.value:
@@ -61,7 +62,7 @@ class NetworkServer (Process):
             except Exception as e:
                 self.logger.error(str((e, traceback.print_exc())))
 
-
+        self.logger.info("invoke streamServer with ({},{})".format(self.ip,self.port))
         self.streamServer = StreamServer((self.ip, self.port), _handler)
         try:
             self.streamServer.serve_forever()
