@@ -78,7 +78,7 @@ def network_config(filename, N,i):
                 if pid not in range(N):
                     continue
                 if pid == i:
-                    my_address = (priv_ip, port)
+                    my_address = (pub_ip, port)
                 addresses[pid] = (pub_ip, port)
         assert all([node is not None for node in addresses])
         print(filename + " is correctly read")
