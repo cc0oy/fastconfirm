@@ -283,6 +283,7 @@ class Fastconfirm:
                     voteset[hB].put(sig)
                     # print("round",self.round,"node",self.id,"votesize:",voteset[hB].qsize())
                     if voteset[hB].qsize() >= (2 * self.f + 1) * self.T:
+                        self.logger.info("node {} get {} votes".format(self.id,voteset[hB].qsize()))
                         pc_hB = hB
                         c = 1
             if c == 1:
