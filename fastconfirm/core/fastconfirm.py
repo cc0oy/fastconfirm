@@ -376,6 +376,7 @@ class Fastconfirm:
             '''round1 block directly committed'''
             self.logger.info("output round {} directly {}".format(self.round, B))
             print("output in round 1",B)
+            self.lB=B
         else:
             (h_s, round_s, g_s) = self.state
             if g_s == 2:
@@ -383,8 +384,8 @@ class Fastconfirm:
                     self.height += 1
                     print("output in round ", self.round, B)
                     self.logger.info("commit in round {}: {}".format(self.round, B))
-                    lastcommit = 1
-                    lB = B
+                    self.lastcommit = 1
+                    self.lB = B
                 else:
                     while self._tobe_commit.empty() is not True:
                         tB = self._tobe_commit.get()
