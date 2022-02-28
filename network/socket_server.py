@@ -63,7 +63,7 @@ class NetworkServer (Process):
                 self.logger.error(str((e, traceback.print_exc())))
 
         self.streamServer = StreamServer((self.ip, self.port), _handler)
-        self.logger.info("invoke streamServer with ({},{}) object {}".format(self.ip,self.port,self.streamServer))
+        self.logger.info("invoke streamServer with ({},{}) object {}".format(self.ip,self.port,type(self.streamServer)))
 
         try:
             self.streamServer.serve_forever()
