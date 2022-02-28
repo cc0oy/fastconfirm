@@ -296,7 +296,7 @@ class Fastconfirm:
             while time.time() - start < delta:
                 gevent.sleep(0)
             precommit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
-                      self.round, t, my_pi, my_h, 0, None,
+                      self.round, t, my_pi, my_h, 0, None,None,
                       make_pc_send(self.round))
 
         def make_commit_send(r):  # this make will automatically deep copy the enclosed send func
@@ -373,8 +373,9 @@ class Fastconfirm:
         # print(self.state)
 
         if self.round == 1:
-            self.logger.info("output round1 directly {}".format(self.round, B))
-            print(B)
+            '''round1 block directly committed'''
+            self.logger.info("output round {} directly {}".format(self.round, B))
+            print("output in round 1",B)
         else:
             (h_s, round_s, g_s) = self.state
             if g_s == 2:
