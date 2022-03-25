@@ -191,10 +191,10 @@ if __name__ == '__main__':
     #                            stop)
     # net_client = NetworkClient(my_address_node[1], my_address_node[0], i, addresses_node, client_from_bft, client_ready,
     #                            stop)
-    net_server = GossipServer(10,my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, bft_to_client,
+    net_server = GossipServer(2,my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, bft_to_client,
                               server_ready,
                               stop)
-    net_client = GossipClient(10,my_address_node[1], my_address_node[0], i, addresses_node, client_from_bft, client_ready,
+    net_client = GossipClient(2,my_address_node[1], my_address_node[0], i, addresses_node, client_from_bft, client_ready,
                               stop)
     bft = instantiate_bft_node(sid, i, S, B, N, f, K, T, bft_from_server, bft_to_client, bft_from_app, net_ready, stop,
                                P, M, F, D, O)
