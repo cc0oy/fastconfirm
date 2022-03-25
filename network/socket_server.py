@@ -30,7 +30,7 @@ class NetworkServer (Process):
         super().__init__()
 
     def _listen_and_recv_forever(self):
-        print("listen and receive loop")
+        #print("listen and receive loop")
         pid = os.getpid()
         self.logger.info('node %d\'s socket server starts to listen ingoing connections on process id %d' % (self.id, pid))
         self.logger.info("my IP is " + self.ip+":"+str(self.port))
@@ -52,8 +52,8 @@ class NetworkServer (Process):
                             (j, o) = (jid, pickle.loads(data))
                             # assert j in range(self.N)
                             self.server_to_bft((j, o))
-                            # self.logger.info('recv' + str((j, o)))
-                            print('recv' + str((j, o)))
+                            self.logger.info('recv' + str((j, o)))
+                            # print('recv' + str((j, o)))
                         else:
                             self.logger.error('syntax error messages')
                             raise ValueError
@@ -88,7 +88,7 @@ class NetworkServer (Process):
             if address[0] != '127.0.0.1' and address[0] == self.addresses_list[i][0]:
                 # self.logger.debug("if enter")
                 return i
-        return int((address[1] - 10000) / 200)
+        return int((address[1] - 10000) / 300)
 
     def _set_server_logger(self, id: int):
         logger = logging.getLogger("node-net-server" + str(id))
