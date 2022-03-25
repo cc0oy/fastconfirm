@@ -60,7 +60,7 @@ BroadcastReceiverQueues = namedtuple(
 
 def broadcast_receiver_loop(recv_func, recv_queues):
     while True:
-        sender, (tag, msg) = recv_func()
+        sender, (tag, osender,msg) = recv_func()
         # print("recv:", sender, tag, msg)
         if tag not in BroadcastTag.__members__:
             # TODO Post python 3 port: Add exception chaining.
@@ -72,10 +72,10 @@ def broadcast_receiver_loop(recv_func, recv_queues):
         # if tag == BroadcastTag.X_NWABC.value:
         # recv_queue = recv_queue[r]
         try:
-            recv_queue.put_nowait((sender, msg))
+            recv_queue.put_nowait((sender, osender,msg))
             # print("receiver_loop:", sender, "->", pid, msg)
         except AttributeError as e:
-            print("error", sender, (tag, msg))
+            print("error", sender, (tag, osender,msg))
             traceback.print_exc(e)
 
 
@@ -134,7 +134,7 @@ class Fastconfirm:
         self.height = 0
         self.lB = None
         self.hconfirm = hash(self.lB)
-        self.T = 1
+        # self.T = 1
         self.input = Queue(1)
 
         self.rpk = [] * 1024
@@ -144,8 +144,8 @@ class Fastconfirm:
 
         self._per_round_recv = {}
         '''put 25 transactions initially'''
-        for _ in range(25):
-            atx = tx_generator(250)
+        for _ in range(1200):
+            atx = tx_generator(25)
             self.transaction_buffer.put_nowait(atx)
         # print("have put {} txs".format(server_app_mpq.qsize()))
 
@@ -184,14 +184,14 @@ class Fastconfirm:
             self.input.get()
         self.input.put("this is a tx batch in round " + str(self.round))
 
-        def make_bp_send(r):  # this make will automatically deep copy the enclosed send func
+        def make_bp_send(original_sender,r):  # this make will automatically deep copy the enclosed send func
             def bp_send(k, o):
                 """CBC send operation.
                 :param k: Node to send.
                 :param o: Value to send.
                 """
-                print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
-                self._send(k, ('F_BP', r, o))
+                # print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
+                self._send(k, ('F_BP', original_sender,r, o))
 
             return bp_send
 
@@ -201,22 +201,23 @@ class Fastconfirm:
         # print("rsk check before entering proposal {}".format(len(self.rsk)))
         blockproposal(self.id, self.sid + 'BP', self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt, self.round,
                       self.state, self.height, self.lB, self.hconfirm, self.takeout_tx,
-                      make_bp_send(self.round))
+                      make_bp_send(self.id,self.round))
 
-        def make_vote_send(r):  # this make will automatically deep copy the enclosed send func
+        def make_vote_send(original_sender,r):  # this make will automatically deep copy the enclosed send func
             def vote_send(k, o):
                 """CBC send operation.
                 :param k: Node to send.
                 :param o: Value to send.
                 """
-                print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
-                self._send(k, ('F_VOTE', r, o))
+                # print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
+                self._send(k, ('F_VOTE', original_sender,r, o))
 
             return vote_send
 
         delta = self.T
         start = time.time()
         t, my_pi, my_h = memselection(self.round, 2, self.sPK2s[self.id], self.sSK2)
+        B=None
         if t == 1:
             # wait for bp finish
             # print(start)
@@ -227,87 +228,105 @@ class Fastconfirm:
             while time.time() - start < delta:
                 gevent.sleep(0)
             # print("bp size test",bp_recvs.qsize())
+            self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             while bp_recvs.qsize() > 0:
                 gevent.sleep(0)
-                sender, (g, h, pi, B, hB, height, sig) = bp_recvs.get()
-                print(sender, (g, h, pi, B, hB, height, sig))
+                sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
+                # print(sender, " ",osender,(g, h, pi, B, hB, height, sig))
+                if lg == 2 or (lg == 1 and self.lastcommit == 1):
+                    if g == 0:
+                        continue
+                # self.logger.debug("maxh={},h={},test maxh < h:{}".format(maxh, int.from_bytes(h, 'big'),maxh < int.from_bytes(h, 'big')))
+                if maxh < int.from_bytes(h, 'big'):
+                    maxh = int.from_bytes(h, 'big')
+                    leader = osender
+                    # print(pid, "change:", leader)
+                    leader_msg = (g, h, pi, B, hB, height, sig)
+            print(self.id, "get the leader:", leader, "chosen block is:", leader_msg)
+            vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
+                 self.round, t, my_pi, my_h, leader_msg, make_vote_send(self.id,self.round))
+        else:
+            (b, r, lg) = self.state
+            maxh = 0
+            block_dic = {}
+            while time.time() - start < delta:
+                gevent.sleep(0)
+            self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
+            while bp_recvs.qsize()>0:
+                sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
+                block_dic[osender]=(g, h, pi, B, hB, height, sig)
                 if lg == 2 or (lg == 1 and self.lastcommit == 1):
                     if g == 0:
                         continue
                 if maxh < int.from_bytes(h, 'big'):
                     maxh = int.from_bytes(h, 'big')
-                    leader = sender
                     # print(pid, "change:", leader)
-                    leader_msg = (g, h, pi, B, hB, height, sig)
-            print(self.id, "get the leader:", leader, "chosen block is:", leader_msg)
-            vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
-                 self.round, t, my_pi, my_h, leader_msg, make_vote_send(self.round))
-        else:
-            while time.time() - start < delta:
-                gevent.sleep(0)
             print(self.id,"vote phase t!=1")
             vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
-                 self.round, t, my_pi, my_h, None, make_vote_send(self.round))
+                 self.round, t, my_pi, my_h, None, make_vote_send(self.id,self.round))
 
-        def make_pc_send(r):  # this make will automatically deep copy the enclosed send func
+        def make_pc_send(original_sender,r):  # this make will automatically deep copy the enclosed send func
             def pc_send(k, o):
                 """CBC send operation.
                 :param k: Node to send.
                 :param o: Value to send.
                 """
                 # print("node", self.id, " is sending ", o[0], " to node ", k, " with the round ", r)
-                self._send(k, ('F_PC', r, o))
+                self._send(k, ('F_PC',original_sender, r, o))
 
             return pc_send
 
         # wait for vote msg
         t, my_pi, my_h = memselection(self.round, 3, self.sPK2s[self.id], self.sSK2)
+        start = time.time()
+        while time.time() - start < delta:
+            gevent.sleep(0)
+        self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
+
+        pc_hB = 0
         if t == 1:
             voteset = defaultdict(lambda: Queue())
             c = 0
             count = 0
-            start = time.time()
-            pc_hB = 0
-            while time.time() - start < delta:
-                gevent.sleep(0)
-
             while vote_recvs.qsize() > 0:
                 # print("node", self.id, "vote_recv queue size", vote_recvs.qsize(),"in round",self.round)
                 gevent.sleep(0)
-                sender, (g, h, pi, hB, height, sig) = vote_recvs.get()
+                sender, osender,(g, h, pi, hB, height, sig) = vote_recvs.get()
                 # test_certain_key(sender,"test",self.sPK2s[sender])
-                print("node",self.id,"recv from",sender,pi,h,str(self.sPK2s[sender]))
-                if vrifymember(self.round, 2, h, pi, self.sPK2s[sender]):
+                # print("node",self.id,"recv from",sender,pi,h,str(self.sPK2s[sender]))
+                # print("node {} verify vote member {} from {}".format(self.id,vrifymember(self.round, 2, h, pi, self.sPK2s[osender]),osender))
+                if vrifymember(self.round, 2, h, pi, self.sPK2s[osender]):
                     (s, b) = sig
                     # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
                     voteset[hB].put(sig)
                     # print("round",self.round,"node",self.id,"votesize:",voteset[hB].qsize())
-                    if voteset[hB].qsize() >= (2 * self.f + 1) * self.T:
-                        self.logger.info("node {} get {} votes".format(self.id,voteset[hB].qsize()))
+                    if voteset[hB].qsize() >= (2 * self.f + 1):
+                        # self.logger.info("node {} in round {} get {} votes with hB{}".format(self.id,self.round,voteset[hB].qsize(),hB))
                         pc_hB = hB
                         c = 1
+            # self.logger.info("voteset length {} with hb element {}".format(len(voteset),voteset[hB].qsize()))
             if c == 1:
-                print("get a valid vote set")
+                print("node {} in round {} get a valid vote set".format(self.id,self.round))
             else:
-                print("not valid vote set")
+                print("node {} in round {} not valid vote set".format(self.id,self.round))
             precommit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                       self.round, t, my_pi, my_h, c, pc_hB,voteset[pc_hB],
-                      make_pc_send(self.round))
+                      make_pc_send(self.id,self.round))
         else:
             while time.time() - start < delta:
                 gevent.sleep(0)
             precommit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                       self.round, t, my_pi, my_h, 0, None,None,
-                      make_pc_send(self.round))
+                      make_pc_send(self.id,self.round))
 
-        def make_commit_send(r):  # this make will automatically deep copy the enclosed send func
+        def make_commit_send(original_sender,r):  # this make will automatically deep copy the enclosed send func
             def commit_send(k, o):
                 """CBC send operation.
                 :param k: Node to send.
                 :param o: Value to send.
                 """
                 # print("node", pid, "is sending", o[0], "to node", k, "with the round", r)
-                self._send(k, ('F_COMMIT', r, o))
+                self._send(k, ('F_COMMIT', original_sender,r, o))
 
             return commit_send
 
@@ -320,51 +339,65 @@ class Fastconfirm:
         c = 0
         while time.time() - start < delta:
             gevent.sleep(0)
+        self.logger.info("node {} receive {} pc".format(self.id, pc_recvs.qsize()))
         while pc_recvs.qsize() > 0:
             gevent.sleep(0)
-            sender, (g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
-
-            if vrifymember(self.round, 3, h, pi, self.sPK2s[sender]) and len(vote_set)>=2*self.f+1:
+            sender, osender,(g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
+            # print("node {} in round {} omega set verify vote_set len: {}".format(self.id,self.round,len(vote_set)))
+            # print("node {} in round {} 3 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 3, h, pi, self.sPK2s[osender]),sender))
+            if vrifymember(self.round, 3, h, pi, self.sPK2s[osender]) and len(vote_set)>=2*self.f+1:
+                # print("omega set: enter vrify member condition")
                 (s, b) = sig
                 # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
-                preset[pc_hB].put((sender, h, pi, sig))
-                if preset[pc_hB].qsize() >= (2 * self.f + 1) * self.T:
+                preset[pc_hB].put((osender, h, pi, sig))
+                if preset[pc_hB].qsize() >= (2 * self.f + 1):   #find a 2f+1 precommit set
+                    # print("omega set: c_hB=pc_hB")
                     c_hB = pc_hB
                     o = 1
+        # self.logger.info("pcset length {} with pc_hB element {}".format(len(preset),preset[pc_hB].qsize()))
         if o == 1:
-            print("get a valid omega set")
+            print("node {} in round {} get a valid omega set".format(self.id,self.round))
         else:
-            print("not a valid omega set")
+            print("node {} in round {} not a valid omega set".format(self.id,self.round))
 
         commit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
-               self.round, o, preset[c_hB], c_hB, make_commit_send(self.round))
+               self.round, o, preset[c_hB], c_hB, make_commit_send(self.id,self.round))
 
         # wait for commit finish
         omegaset = defaultdict(lambda: Queue())
         pc = 0
         count = 0
         start = time.time()
-        g_hB = 0
+        g_hB = -1
         while time.time() - start < delta:
             try:
                 gevent.sleep(0)
-                sender, (o_j, h, pi, c_hB_j, omega_str, sig, rpk_j_byte, rmt_j) = commit_recvs.get_nowait()
+                sender,osender ,(o_j, h, pi, c_hB_j, omega_str, sig, rpk_j_byte, rmt_j) = commit_recvs.get_nowait()
+
             except:
                 continue
-            if vrifymember(self.round, 4, h, pi, self.sPK2s[sender]):
+            # print("node {} in round {} 4 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 4, h, pi, self.sPK2s[osender]),sender))
+            if vrifymember(self.round, 4, h, pi, self.sPK2s[osender]):
+                # print("PC set: enter vrify member condition")
                 (s, b) = sig
                 rpk_j=PublicKey(rpk_j_byte)
                 if vrify(s, b, omega_str + str(c_hB_j), rpk_j, rmt_j, ((self.round - 1) * 4) + 3, 1024):
-                    omegaset[c_hB].put((sender, h, pi, omega_str, sig))
-                    if omegaset[c_hB].qsize() >= (2 * self.f + 1) * self.T:
+                    # print("PC set: enter vrify condition")
+                    count += 1
+                    omegaset[c_hB].put((osender, h, pi, omega_str, sig))
+                    if omegaset[c_hB].qsize() >= (2*self.f+1) :    #precommit set set
+                        # print("PC set: g_hB=c_hB")
                         g_hB = c_hB
                         pc = 1
-        """
+
+        self.logger.info("node {} receive {} commit".format(self.id,count))
         if pc == 1:
-            print("get a valid PC set")
+            print("node {} get a valid PC set".format(self.id))
         else:
-            print("not a valid PC set")
-        """
+            print("round {} node {}: dict size{}, omegaset[c_hb]{}".format(self.round,self.id, len(omegaset), omegaset[c_hB].qsize()))
+            print("node {} not a valid PC set".format(self.id))
+
+        self.logger.info("{} judge c_hB=g_hB {}={}?".format(c_hB==g_hB,c_hB,g_hB))
         if c_hB == g_hB:
             self.state = (g_hB, self.round, 2)
         elif (c_hB != g_hB and pc == 1) or (o == 0 and pc == 1):
@@ -376,30 +409,34 @@ class Fastconfirm:
         if self.round == 1:
             '''round1 block directly committed'''
             self.logger.info("output round {} directly {}".format(self.round, B))
-            print("output in round 1",B)
+            # print("output in round 1",B)
             self.lB=B
         else:
             (h_s, round_s, g_s) = self.state
+            self.logger.info("round {} state info g_s={}".format(self.round,g_s))
             if g_s == 2:
                 if hash(self.lB) == B[0]:
                     self.height += 1
-                    print("output in round ", self.round, B)
-                    self.logger.info("commit in round {}: {}".format(self.round, B))
+                    # print("output in round ", self.round, B)
+                    self.logger.info("commit in round {}: {} by hash(lB)=B".format(self.round, B))
+                    print("commit in round {}: {} by hash(lB)=B".format(self.round, B))
                     self.lastcommit = 1
                     self.lB = B
                 else:
                     while self._tobe_commit.empty() is not True:
                         tB = self._tobe_commit.get()
                         self.height += 1
-                        print("output in round ", self.round, tB)
-                        self.logger.info("commit in round {}: {}".format(self.round,tB) )
+                        # print("output in round ", self.round, tB)
+                        self.logger.info("commit in round {}: {} by to commit".format(self.round,tB) )
+                        print("commit in round {}: {} by to commit".format(self.round, tB))
                     self.height += 1
-                    print("output in round ", self.round, B)
-                    self.logger.info("commit in round {}: {}".format(self.round, B))
+                    # print("output in round ", self.round, B)
+                    print("commit in round {}: {} just =2".format(self.round, B))
+                    self.logger.info("commit in round {}: {} just =2".format(self.round, B))
                     self.lastcommit = 1
                     self.lB = B
             else:
-                print("do not have commited block in round ", self.round)
+                # print("do not have commited block in round ", self.round)
                 self.logger.info("do not have committed block in round {}".format(self.round))
                 self.lastcommit = 0
                 self._tobe_commit.put(B)
@@ -416,14 +453,14 @@ class Fastconfirm:
                 # print(atx)
                 # self.transaction_buffer.put_nowait(atx)
                 try:
-                    sender, (tag, r, msg) = self._recv()
+                    sender, (tag,osender, r, msg) = self._recv()
                     # print('recv '+tag+str((sender, r, msg)))
-                    print("round",r,":node",self.id,"recv",tag,"from",sender)
+                    # print("round",r,":node",self.id,"recv",tag,"origin sender",osender,"from",sender)
                     # Maintain an *unbounded* recv queue for each epoch
                     if r not in self._per_round_recv:
                         self._per_round_recv[r] = Queue()
                     # Buffer this message
-                    self._per_round_recv[r].put_nowait((sender, (tag, msg)))
+                    self._per_round_recv[r].put_nowait((sender, (tag, osender,msg)))
                 except:
                     # print("receive consensus message error")
                     continue
@@ -451,13 +488,16 @@ class Fastconfirm:
         self._recv_txs_thread.start()
 
 
-        print(self.id,"start consensus with txs:",self.transaction_buffer.qsize())
+        # print(self.id,"start consensus with txs:",self.transaction_buffer.qsize())
         while self.round <= self.SLOTS_NUM:
-            self.logger.info("{} start consensus round: {}".format(self.id,self.round))
+            self.logger.info("****************************\n{} start consensus round: {}".format(self.id,self.round))
             # print(self.id,str(self.sPK2s[0].format()),str(self.sPK2s[1].format()),str(self.sPK2s[2].format()),str(self.sPK2s[3].format()))
             if self.round not in self._per_round_recv:
                 self._per_round_recv[self.round] = Queue()
             st = time.time()
             self.fastconfirm_round()
-            if self.id == 0: print(time.time()-st)
+            if self.id == 0:
+                self.logger.info("finish round {} with in {} seconds".format(self.round-1,time.time()-st))
             time.sleep(0.1)
+        print("end normal")
+        self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

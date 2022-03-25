@@ -36,22 +36,24 @@ def precommit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, t, pi, h, c, pc_hB, 
     # print("--", pid, h, pi)
     if t == 1:
         # print(pid, "is select in commit!")
-
+        votelist=[]
         if c > 0:
             position = ((round - 1) * 4) + 2
             votelist=queue2list(voteset)
             # votelist=str(voteset)
             sig = sign(rsk[position], str(pc_hB), rmt, position)
             msg = (1, h, pi, pc_hB,votelist, sig)
+            print("precommits sends in round c>0 ", round)
 
         if c == 0:
             # not a valid C
             position = ((round - 1) * 4) + 2
             sig = sign(rsk[position], "null", rmt, position)
-            msg = (0, h, pi, None, None,sig)
+            msg = (0, h, pi, None, votelist,sig)
+            print("precommits sends in round c=0 ", round)
 
         pre_broadcast(msg)
-        print("precommits sends in round", round)
+        # print("precommits sends in round", round)
         return 1
     else:
         # print(pid, "is not selected as a committee member")

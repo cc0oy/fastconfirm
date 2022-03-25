@@ -22,7 +22,7 @@ def load_key_pickle(id,N):
 
     with open(os.getcwd() + '/keys-1000/' + 'eSK-' + str(id) + '.key', 'rb') as fp:
         eSK = pickle.load(fp)
-    print("node",id,"read keys",type(pk[0]),type(sSK))
+    # print("node",id,"read keys",type(pk[0]),type(sSK))
     return sSK,pk
 
 
@@ -46,7 +46,7 @@ class FastConfirmNode(Fastconfirm):
                  debug=True):
         # self.sk, self.pks = load_key(os.getcwd() + '/keys_4test/', pid, N)
         self.sk, self.pks = load_key_pickle(pid, N)
-        print("end load keys")
+        # print("end load keys")
         self.bft_from_server = bft_from_server
         self.bft_to_client = bft_to_client
         print()
@@ -55,7 +55,7 @@ class FastConfirmNode(Fastconfirm):
         self.stop = stop
         self.debug = debug
         self.mempool = bft_from_app
-        print("consensus initialize")
+        # print("consensus initialize")
         Fastconfirm.__init__(self, sid, pid, T,S, B, N, f, self.pks, self.sk, send=None, recv=None, recv_txs=None, K=3,
                              mute=False,
                              debug=False)

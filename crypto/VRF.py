@@ -2,9 +2,12 @@ import hashlib
 import binascii
 import operator
 import math
+import os
 import pickle
 import sys
 from sys import argv
+
+from coincurve import PublicKey, PrivateKey
 from gevent import time
 from crypto.ecdsa import ecdsa
 from crypto.ecdsa.ecdsa import ecdsa_vrfy, ecdsa_sign
@@ -146,14 +149,39 @@ def VRF_verifying(public_key, pi, h, alpha, k):
         if mgf1(alpha + str(public_key.format()), k - 1) == h:
             print("mgf1=h")
         else:
-            print("mgf1 error")
+            print("mgf2 error")
         return False
 
 
+def load_key_pickle(id,N,path):
+    pk=[]
+    sk=[]
+    for i in range(N):
+        with open(path+'/keys-1000/' + 'sPK2-'+str(i)+'.key', 'rb') as fp:
+            # sPK = pickle.load(fp)
+            pk.append(PublicKey(pickle.load(fp)))
+
+    for j in range(N):
+        with open( path+'/keys-1000/' + 'sSK2-'+str(j)+'.key', 'rb') as fp:
+            # sPK = pickle.load(fp)
+            sk.append(PrivateKey(pickle.load(fp)))
+
+    with open(path+ '/keys-1000/' + 'ePK.key', 'rb') as fp:
+        ePK = pickle.load(fp)
+
+    with open(path+ '/keys-1000/' + 'sSK2-' + str(id) + '.key', 'rb') as fp:
+        sSK = PrivateKey(pickle.load(fp))
+
+    with open(path+ '/keys-1000/' + 'eSK-' + str(id) + '.key', 'rb') as fp:
+        eSK = pickle.load(fp)
+    # print("node",id,"read keys",type(pk[0]),type(sSK))
+    return sSK,pk,sk
+
 if __name__ == "__main__":
-    pk, sk = ecdsa.pki(1000)
+    path = '/home/cc/program/myexp/fastconfirm'
+    _,pk, sk = load_key_pickle(1,1000,path)
     k = 4
-    T = pow(2, (k - 1) * 8)*(1 - 0.685)
+    T = pow(2, (k - 1) * 8)*(1 - 1)
     print(T)
     count = 0
     for i in range (1000):
