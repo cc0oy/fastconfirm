@@ -2,7 +2,7 @@
 
 # N f B K
 echo "start.sh <N> <F> <B> <K>"
-python3 run_trusted_key_gen.py --N $1 --f $2
+#python3 run_trusted_key_gen.py --N $1 --f $2
 killall python3
 i=0
 while [ "$i" -lt $1 ]; do

@@ -20,11 +20,11 @@ def trusted_key_gen(N=4, f=1, seed=None):
     sPK2s, sSK2s = ecdsa.pki(N)
 
     # Save all keys to files
-    if 'keys' not in os.listdir(os.getcwd()):
-        os.mkdir(os.getcwd() + '/keys')
+    if 'keys-'+str(N) not in os.listdir(os.getcwd()):
+        os.mkdir(os.getcwd() + '/keys-'+str(N))
 
     # public key of (f+1, n) thld sig
-    with open(os.getcwd() + '/keys/' + 'sPK.key', 'wb') as fp:
+    with open(os.getcwd() + '/keys-'+str(N)+'/' + 'sPK.key', 'wb') as fp:
         pickle.dump(sPK, fp)
 
     # public key of (n-f, n) thld sig

@@ -6,6 +6,8 @@ from gevent import monkey;
 # from myexperiements.sockettest.x_k_s_node import XDSNode
 from Client.make_random_tx import tx_generator
 from fastconfirm.fc_node import FastConfirmNode
+from network.gossip_client import GossipClient
+from network.gossip_server import GossipServer
 
 monkey.patch_all(thread=False)
 
@@ -28,7 +30,7 @@ from multiprocessing import Value as mpValue, Queue as mpQueue
 from ctypes import c_bool
 
 
-def instantiate_bft_node(sid, i, S,B, N, f, K, T, bft_from_server: Callable, bft_to_client: Callable,
+def instantiate_bft_node(sid, i, S, B, N, f, K, T, bft_from_server: Callable, bft_to_client: Callable,
                          bft_from_app: Callable, ready: mpValue,
                          stop: mpValue, protocol="mule", mute=False, F=100, debug=False, omitfast=False):
     bft = None
@@ -57,14 +59,14 @@ def instantiate_bft_node(sid, i, S,B, N, f, K, T, bft_from_server: Callable, bft
     # elif protocol == 'xs':
     #     bft = XDSNode(sid, i, S, T, B, F, N, f, bft_from_server, bft_to_client, ready, stop, K, mute=mute)
     if protocol == 'fc':
-        bft = FastConfirmNode(sid, i, T,S, B, N, f, bft_from_server, bft_to_client, bft_from_app, ready, stop, K,
+        bft = FastConfirmNode(sid, i, T, S, B, N, f, bft_from_server, bft_to_client, bft_from_app, ready, stop, K,
                               mute)
     else:
         print("Only support dumbo or sdumbo or mule or hotstuff")
     return bft
 
 
-def network_config(filename, N,i):
+def network_config(filename, N, i):
     addresses = [None] * N
     try:
         with open(filename, 'r') as hosts:
@@ -81,9 +83,11 @@ def network_config(filename, N,i):
                     my_address = (priv_ip, port)
                 addresses[pid] = (pub_ip, port)
         assert all([node is not None for node in addresses])
-        print(filename + " is correctly read")
+        print(filename + " is correctly read and " + str(N) + "node initialize")
     except FileNotFoundError or AssertionError as e:
         traceback.print_exc()
+    print("node {} addresses {}".format(i, addresses))
+    print("my {} address".format(i, my_address))
     return addresses, my_address
 
 
@@ -139,7 +143,7 @@ if __name__ == '__main__':
     rnd = random.Random(sid)
 
     # Nodes list
-    addresses_node, my_address_node = network_config('hosts.config', N,i)
+    addresses_node, my_address_node = network_config('hosts.config', N, i)
 
     # port communicated with client
     # addresses_client, my_address_client = network_config('host_client.config', N,i)
@@ -163,9 +167,9 @@ if __name__ == '__main__':
     bft_from_app = lambda: server_app_mpq.get(timeout=0.0001)
     bft_to_app = server_app_mpq.put_nowait
     '''put some transactions initilly'''
-    print("put txs 250 initially")
+    # print("put txs 250 initially")
     for _ in range(25):
-        atx=tx_generator(250)
+        atx = tx_generator(250)
         server_app_mpq.put_nowait(atx)
     print("have put {} txs".format(server_app_mpq.qsize()))
 
@@ -178,15 +182,20 @@ if __name__ == '__main__':
     # net_listen = NetworkServer(my_address_client[1], my_address_client[0], i, addresses_client, bft_to_app,
     #                            server_ready, stop)
 
-    start=time.time()
+    start = time.time()
     # net_listen.start()
     # while time.time()-start<0.1:
     #     continue
-    print("start consensus node")
-    net_server = NetworkServer(my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, server_ready,
-                               stop)
-    net_client = NetworkClient(my_address_node[1], my_address_node[0], i, addresses_node, client_from_bft, client_ready,
-                               stop)
+    # print("start consensus node")
+    # net_server = NetworkServer(my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, server_ready,
+    #                            stop)
+    # net_client = NetworkClient(my_address_node[1], my_address_node[0], i, addresses_node, client_from_bft, client_ready,
+    #                            stop)
+    net_server = GossipServer(2,my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, bft_to_client,
+                              server_ready,
+                              stop)
+    net_client = GossipClient(2,my_address_node[1], my_address_node[0], i, addresses_node, client_from_bft, client_ready,
+                              stop)
     bft = instantiate_bft_node(sid, i, S, B, N, f, K, T, bft_from_server, bft_to_client, bft_from_app, net_ready, stop,
                                P, M, F, D, O)
     net_server.start()
@@ -194,7 +203,7 @@ if __name__ == '__main__':
 
     while not client_ready.value and not server_ready.value:
         time.sleep(1)
-        print("waiting for network ready with {} {}...".format(client_ready.value,server_ready.value))
+        print("waiting for network ready with {} {}...".format(client_ready.value, server_ready.value))
 
     with net_ready.get_lock():
         net_ready.value = True
