@@ -80,7 +80,7 @@ def broadcast_receiver_loop(recv_func, recv_queues):
 
 
 class Fastconfirm:
-    def __init__(self, sid, pid, T,S, B, N, f, sPK2s, sSK2, send, recv,recv_txs,K, mute=False,
+    def __init__(self, sid, pid, T,S, B, N, f, sPK2s, sSK2, recv, send,recv_txs,K, mute=False,
                  debug=True):
         '''
 
@@ -496,8 +496,7 @@ class Fastconfirm:
                 self._per_round_recv[self.round] = Queue()
             st = time.time()
             self.fastconfirm_round()
-            if self.id == 0:
-                self.logger.info("finish round {} with in {} seconds".format(self.round-1,time.time()-st))
+            self.logger.info("finish round {} with in {} seconds".format(self.round-1,time.time()-st))
             time.sleep(0.1)
         print("end normal")
         self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

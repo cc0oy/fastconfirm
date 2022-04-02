@@ -69,7 +69,7 @@ class FastConfirmNode(Fastconfirm):
 
     def prepare_bootstrap(self):
         self.logger.info('node id %d is inserting dummy payload TXs' % (self.id))
-        # print("node {} prepare".format(self.id))
+        print("node {} prepare".format(self.id))
         if self.debug == True:  # K * max(Bfast * S, Bacs)
             tx = self.get_txs(self.B * self.K)
             Fastconfirm.submit_tx(self, tx)
