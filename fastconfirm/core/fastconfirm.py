@@ -144,7 +144,7 @@ class Fastconfirm:
 
         self._per_round_recv = {}
         '''put 25 transactions initially'''
-        for _ in range(1200):
+        for _ in range(4000):
             atx = tx_generator(25)
             self.transaction_buffer.put_nowait(atx)
         # print("have put {} txs".format(server_app_mpq.qsize()))
@@ -166,6 +166,7 @@ class Fastconfirm:
         self.rpk, self.rsk, self.rmt = round_key_generation(key_num)
 
     def fastconfirm_round(self):
+        print("start consensus")
         bp_recvs = Queue()
         vote_recvs = Queue()
         pc_recvs = Queue()
@@ -491,6 +492,7 @@ class Fastconfirm:
         # print(self.id,"start consensus with txs:",self.transaction_buffer.qsize())
         while self.round <= self.SLOTS_NUM:
             self.logger.info("****************************\n{} start consensus round: {}".format(self.id,self.round))
+            print("****************************\n{} start consensus round: {}".format(self.id, self.round))
             # print(self.id,str(self.sPK2s[0].format()),str(self.sPK2s[1].format()),str(self.sPK2s[2].format()),str(self.sPK2s[3].format()))
             if self.round not in self._per_round_recv:
                 self._per_round_recv[self.round] = Queue()
