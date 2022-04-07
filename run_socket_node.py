@@ -168,7 +168,7 @@ if __name__ == '__main__':
     bft_to_app = server_app_mpq.put_nowait
     '''put some transactions initilly'''
     # print("put txs 250 initially")
-    for _ in range(25):
+    for _ in range(4000):
         atx = tx_generator(250)
         server_app_mpq.put_nowait(atx)
     print("have put {} txs".format(server_app_mpq.qsize()))
