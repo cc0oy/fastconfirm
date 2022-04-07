@@ -113,7 +113,7 @@ class GossipClient(Process):
                         # self.logger.info("try to connect")
                         self.is_out_sock_connected[j] = self._connect(j)
                         # self.logger.info("is out sock connect {} result {}".format(j,self.is_out_sock_connected[j]))
-                print("node {} all connect {}".format(self.id,all(self.is_out_sock_connected)))
+                # print("node {} all connect {}".format(self.id,all(self.is_out_sock_connected)))
                 if all(self.is_out_sock_connected):
                     with self.ready.get_lock():
                         self.logger.info("get lock: {}".format(self.ready.get_lock))
@@ -148,7 +148,7 @@ class GossipClient(Process):
             self.socks[j] = sock
             return True
         except Exception as e1:
-            print("node nod"+str(self.id)+" "+str((e1, traceback.print_exc())))
+            # print("node nod"+str(self.id)+" "+str((e1, traceback.print_exc())))
             return False
 
     def _send(self, j: int):

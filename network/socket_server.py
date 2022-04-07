@@ -88,7 +88,7 @@ class NetworkServer (Process):
             if address[0] != '127.0.0.1' and address[0] == self.addresses_list[i][0]:
                 # self.logger.debug("if enter")
                 return i
-        return int((address[1] - 10000) / 10)
+        return int((address[1] - 10000) / 200)
 
     def _set_server_logger(self, id: int):
         logger = logging.getLogger("node-net-server" + str(id))
