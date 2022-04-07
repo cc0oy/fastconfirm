@@ -159,7 +159,7 @@ class GossipClient(Process):
             o = self.sock_queues[j].get()
             try:
                 # print("send a message in socket: {}".format(o))
-                # self.logger.info("send a message in socket: {}".format(o))
+                self.logger.info("send a message in socket to {}".format(j))
                 self.socks[j].sendall(pickle.dumps(o) + self.SEP)
             except:
                 # self.logger.error("fail to send msg")
@@ -189,8 +189,9 @@ class GossipClient(Process):
                             if i != self.pid:
                                 self.sock_queues[i].put_nowait(o)
                     else:
-                        # print("node {} send to {} with own link {}".format(self.id,self.addresses_list[j],self.link))
+
                         if self.addresses_list[j] in self.link:
+                            self.logger.info("node {} send to {}".format(self.id,j))
                             index=self.link.index(self.addresses_list[j])
                             self.sock_queues[index].put_nowait(o)
                 except Exception as e:

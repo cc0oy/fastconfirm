@@ -243,6 +243,7 @@ class Fastconfirm:
                     leader = osender
                     # print(pid, "change:", leader)
                     leader_msg = (g, h, pi, B, hB, height, sig)
+            self.logger.info("get the leader: {} chosen block is {}".format(leader, leader_msg))
             print(self.id, "get the leader:", leader, "chosen block is:", leader_msg)
             vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                  self.round, t, my_pi, my_h, leader_msg, make_vote_send(self.id,self.round))
@@ -302,10 +303,10 @@ class Fastconfirm:
                     voteset[hB].put(sig)
                     # print("round",self.round,"node",self.id,"votesize:",voteset[hB].qsize())
                     if voteset[hB].qsize() >= (2 * self.f + 1):
-                        # self.logger.info("node {} in round {} get {} votes with hB{}".format(self.id,self.round,voteset[hB].qsize(),hB))
+                        self.logger.info("node {} in round {} get {} votes with hB{}".format(self.id,self.round,voteset[hB].qsize(),hB))
                         pc_hB = hB
                         c = 1
-            # self.logger.info("voteset length {} with hb element {}".format(len(voteset),voteset[hB].qsize()))
+            self.logger.info("voteset length {}".format(len(voteset)))
             if c == 1:
                 print("node {} in round {} get a valid vote set".format(self.id,self.round))
             else:
@@ -352,10 +353,10 @@ class Fastconfirm:
                 # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
                 preset[pc_hB].put((osender, h, pi, sig))
                 if preset[pc_hB].qsize() >= (2 * self.f + 1):   #find a 2f+1 precommit set
-                    # print("omega set: c_hB=pc_hB")
+                    print("{} pc in round {} with pc_hB {}".format(preset[pc_hB].qsize(),self.round,pc_hB))
                     c_hB = pc_hB
                     o = 1
-        # self.logger.info("pcset length {} with pc_hB element {}".format(len(preset),preset[pc_hB].qsize()))
+        self.logger.info("pcset length {}".format(len(preset)))
         if o == 1:
             print("node {} in round {} get a valid omega set".format(self.id,self.round))
         else:
@@ -374,9 +375,11 @@ class Fastconfirm:
             try:
                 gevent.sleep(0)
                 sender,osender ,(o_j, h, pi, c_hB_j, omega_str, sig, rpk_j_byte, rmt_j) = commit_recvs.get_nowait()
-
+                count += 1
             except:
                 continue
+
+
             # print("node {} in round {} 4 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 4, h, pi, self.sPK2s[osender]),sender))
             if vrifymember(self.round, 4, h, pi, self.sPK2s[osender]):
                 # print("PC set: enter vrify member condition")
@@ -384,18 +387,21 @@ class Fastconfirm:
                 rpk_j=PublicKey(rpk_j_byte)
                 if vrify(s, b, omega_str + str(c_hB_j), rpk_j, rmt_j, ((self.round - 1) * 4) + 3, 1024):
                     # print("PC set: enter vrify condition")
-                    count += 1
+
                     omegaset[c_hB].put((osender, h, pi, omega_str, sig))
                     if omegaset[c_hB].qsize() >= (2*self.f+1) :    #precommit set set
                         # print("PC set: g_hB=c_hB")
+                        print("{} commit in round {} with c_hB {}".format(omegaset[c_hB].qsize(), self.round,
+                                                                                    c_hB))
                         g_hB = c_hB
                         pc = 1
 
         self.logger.info("node {} receive {} commit".format(self.id,count))
+        self.logger.info("commit set length {}".format(len(omegaset)))
         if pc == 1:
             print("node {} get a valid PC set".format(self.id))
         else:
-            print("round {} node {}: dict size{}, omegaset[c_hb]{}".format(self.round,self.id, len(omegaset), omegaset[c_hB].qsize()))
+            # print("round {} node {}: dict size{}, omegaset[c_hb]{}".format(self.round,self.id, len(omegaset), omegaset[c_hB].qsize()))
             print("node {} not a valid PC set".format(self.id))
 
         self.logger.info("{} judge c_hB=g_hB {}={}?".format(c_hB==g_hB,c_hB,g_hB))
