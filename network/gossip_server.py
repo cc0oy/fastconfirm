@@ -142,7 +142,7 @@ class GossipServer(Process):
                                 # print('node ' + str(self.id) + ' recv list'+str(len(self._sent))+' '+str(o)+''+ ''+str(recv_hash))
                                 for l in self.link:
                                     l_id = self._address_to_id(l)
-                                    self.logger.info("node {} try forward to {}".format(self.id, l_id))
+                                    self.logger.info("node {} try forward to {} msg {}".format(self.id, l_id,o))
                                     self._send(l_id, o)
                             # print('recv' + str((j, o)))
                         else:

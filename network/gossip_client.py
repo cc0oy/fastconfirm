@@ -19,7 +19,7 @@ class GossipClient(Process):
 
     def __init__(self,link_size:int, port: int, my_ip: str, id: int, addresses_list: list, client_from_bft: Callable,
                  client_ready: mpValue, stop: mpValue):
-        print("client initialize")
+        # print("client initialize")
         self.client_from_bft = client_from_bft
         self.ready = client_ready
         self.stop = stop

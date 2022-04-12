@@ -43,6 +43,20 @@ def set_consensus_log(id: int):
     return logger
 
 
+def set_message_log(id: int):
+    logger = logging.getLogger("consensusmsg-node-" + str(id))
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        '%(asctime)s %(filename)s [line:%(lineno)d] %(funcName)s %(levelname)s %(message)s ')
+    if 'log' not in os.listdir(os.getcwd()):
+        os.mkdir(os.getcwd() + '/log')
+    full_path = os.path.realpath(os.getcwd()) + '/log/' + "consensusmsg-node-" + str(id) + ".log"
+    file_handler = logging.FileHandler(full_path)
+    file_handler.setFormatter(formatter)  # 可以通过setFormatter指定输出格式
+    logger.addHandler(file_handler)
+    return logger
+
+
 def hash(x):
     return hashlib.sha256(pickle.dumps(x)).digest()
 
@@ -111,6 +125,7 @@ class Fastconfirm:
         self._recv = recv
         self._recv_txs=recv_txs
         self.logger = set_consensus_log(pid)
+        self.msglog=set_message_log(pid)
         self.transaction_buffer = Queue()
         # self.output_list = defaultdict(lambda: Queue())
 
@@ -243,7 +258,7 @@ class Fastconfirm:
                     leader = osender
                     # print(pid, "change:", leader)
                     leader_msg = (g, h, pi, B, hB, height, sig)
-            self.logger.info("get the leader: {} chosen block is {}".format(leader, leader_msg))
+            self.logger.info("get the leader: {} chosen {} block is {}".format(leader, leader_msg[4],leader_msg))
             print(self.id, "get the leader:", leader, "chosen block is:", leader_msg)
             vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                  self.round, t, my_pi, my_h, leader_msg, make_vote_send(self.id,self.round))
@@ -285,6 +300,7 @@ class Fastconfirm:
             gevent.sleep(0)
         self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
 
+        vote_tag=0
         pc_hB = 0
         if t == 1:
             voteset = defaultdict(lambda: Queue())
@@ -305,7 +321,9 @@ class Fastconfirm:
                     if voteset[hB].qsize() >= (2 * self.f + 1):
                         self.logger.info("node {} in round {} get {} votes with hB{}".format(self.id,self.round,voteset[hB].qsize(),hB))
                         pc_hB = hB
+                        vote_tag=1
                         c = 1
+            self.logger.info("see vote list: {}".format(voteset.keys()))
             self.logger.info("voteset length {}".format(len(voteset)))
             if c == 1:
                 print("node {} in round {} get a valid vote set".format(self.id,self.round))
@@ -345,15 +363,15 @@ class Fastconfirm:
         while pc_recvs.qsize() > 0:
             gevent.sleep(0)
             sender, osender,(g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
-            # print("node {} in round {} omega set verify vote_set len: {}".format(self.id,self.round,len(vote_set)))
+            print("node {} in round {} pc set verify vote_set len: {}".format(self.id,self.round,len(vote_set)))
             # print("node {} in round {} 3 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 3, h, pi, self.sPK2s[osender]),sender))
             if vrifymember(self.round, 3, h, pi, self.sPK2s[osender]) and len(vote_set)>=2*self.f+1:
-                # print("omega set: enter vrify member condition")
+                self.logger.info("pc set: enter vrify member condition")
                 (s, b) = sig
                 # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
                 preset[pc_hB].put((osender, h, pi, sig))
                 if preset[pc_hB].qsize() >= (2 * self.f + 1):   #find a 2f+1 precommit set
-                    print("{} pc in round {} with pc_hB {}".format(preset[pc_hB].qsize(),self.round,pc_hB))
+                    self.logger.info("{} pc in round {} with pc_hB {}".format(preset[pc_hB].qsize(),self.round,pc_hB))
                     c_hB = pc_hB
                     o = 1
         self.logger.info("pcset length {}".format(len(preset)))
@@ -382,22 +400,21 @@ class Fastconfirm:
 
             # print("node {} in round {} 4 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 4, h, pi, self.sPK2s[osender]),sender))
             if vrifymember(self.round, 4, h, pi, self.sPK2s[osender]):
-                # print("PC set: enter vrify member condition")
+                self.logger.info("omega set: enter vrify member condition")
                 (s, b) = sig
                 rpk_j=PublicKey(rpk_j_byte)
                 if vrify(s, b, omega_str + str(c_hB_j), rpk_j, rmt_j, ((self.round - 1) * 4) + 3, 1024):
-                    # print("PC set: enter vrify condition")
+                    self.logger.info("omega set: enter vrify condition {}".format(omega_str+"!!!!!"+str(c_hB_j)))
 
-                    omegaset[c_hB].put((osender, h, pi, omega_str, sig))
-                    if omegaset[c_hB].qsize() >= (2*self.f+1) :    #precommit set set
+                    omegaset[c_hB_j].put((osender, h, pi, omega_str, sig))
+                    if omegaset[c_hB_j].qsize() >= (2*self.f+1) :    #precommit set set
                         # print("PC set: g_hB=c_hB")
-                        print("{} commit in round {} with c_hB {}".format(omegaset[c_hB].qsize(), self.round,
-                                                                                    c_hB))
-                        g_hB = c_hB
+                        self.logger.info("{} commit in round {} with c_hB {}".format(omegaset[c_hB].qsize(), self.round,c_hB))
+                        g_hB = c_hB_j
                         pc = 1
 
         self.logger.info("node {} receive {} commit".format(self.id,count))
-        self.logger.info("commit set length {}".format(len(omegaset)))
+        self.logger.info("commit set length {} and key is {}".format(len(omegaset),omegaset.keys()))
         if pc == 1:
             print("node {} get a valid PC set".format(self.id))
         else:
@@ -415,9 +432,12 @@ class Fastconfirm:
 
         if self.round == 1:
             '''round1 block directly committed'''
-            self.logger.info("output round {} directly {}".format(self.round, B))
-            # print("output in round 1",B)
-            self.lB=B
+            if vote_tag==1:
+                self.logger.info("output round {} directly {}".format(self.round, B))
+                # print("output in round 1",B)
+                self.lB=B
+            else:
+                self.logger.info("round does not collects enough votes")
         else:
             (h_s, round_s, g_s) = self.state
             self.logger.info("round {} state info g_s={}".format(self.round,g_s))
@@ -462,7 +482,7 @@ class Fastconfirm:
                 try:
                     sender, (tag,osender, r, msg) = self._recv()
                     # print('recv '+tag+str((sender, r, msg)))
-                    # print("round",r,":node",self.id,"recv",tag,"origin sender",osender,"from",sender)
+                    self.msglog.info("round {} recv {} origin sender {} from {} msg is {}".format(r,tag,osender,sender,msg))
                     # Maintain an *unbounded* recv queue for each epoch
                     if r not in self._per_round_recv:
                         self._per_round_recv[r] = Queue()

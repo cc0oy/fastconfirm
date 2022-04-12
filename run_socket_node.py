@@ -86,7 +86,7 @@ def network_config(filename, N, i):
         print(filename + " is correctly read and " + str(N) + "node initialize")
     except FileNotFoundError or AssertionError as e:
         traceback.print_exc()
-    print("node {} addresses {}".format(i, addresses))
+    # print("node {} addresses {}".format(i, addresses))
     print("my {} address {}".format(i, my_address))
     return addresses, my_address
 
