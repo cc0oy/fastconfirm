@@ -114,6 +114,7 @@ class Fastconfirm:
         :param debug:
         '''
         # print("enter fastconfirm.py init function")
+        self._send_mode='broadcast'
         self.sid = sid
         self.id = pid
         self.SLOTS_NUM = S
@@ -207,8 +208,10 @@ class Fastconfirm:
                 :param o: Value to send.
                 """
                 # print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
-                self._send(k, ('F_BP', original_sender,r, o))
-
+                if self._send_mode is 'gossip':
+                    self._send(k, ('F_BP', original_sender,r, o))
+                else:
+                    self._send(k, ('F_BP',  r, o))
             return bp_send
 
         # generate round keys
@@ -226,7 +229,10 @@ class Fastconfirm:
                 :param o: Value to send.
                 """
                 # print("node", self.id, "is sending", o[0], "to node", k, "with the round", r)
-                self._send(k, ('F_VOTE', original_sender,r, o))
+                if self._send_mode is 'gossip':
+                    self._send(k, ('F_VOTE', original_sender,r, o))
+                else:
+                    self._send(k, ('F_VOTE',r, o))
 
             return vote_send
 
@@ -289,7 +295,10 @@ class Fastconfirm:
                 :param o: Value to send.
                 """
                 # print("node", self.id, " is sending ", o[0], " to node ", k, " with the round ", r)
-                self._send(k, ('F_PC',original_sender, r, o))
+                if self._send_mode is 'gossip':
+                    self._send(k, ('F_PC',original_sender, r, o))
+                else:
+                    self._send(k, ('F_PC',r, o))
 
             return pc_send
 
@@ -346,7 +355,10 @@ class Fastconfirm:
                 :param o: Value to send.
                 """
                 # print("node", pid, "is sending", o[0], "to node", k, "with the round", r)
-                self._send(k, ('F_COMMIT', original_sender,r, o))
+                if self._send_mode is 'gossip':
+                    self._send(k, ('F_COMMIT', original_sender,r, o))
+                else:
+                    self._send(k, ('F_COMMIT', r, o))
 
             return commit_send
 
@@ -381,7 +393,7 @@ class Fastconfirm:
             print("node {} in round {} not a valid omega set".format(self.id,self.round))
 
         commit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
-               self.round, o, preset[c_hB], c_hB, make_commit_send(self.id,self.round))
+               self.round, o, preset[c_hB], c_hB, make_commit_send(self.id,self.round),self.logger)
 
         # wait for commit finish
         omegaset = defaultdict(lambda: Queue())
@@ -393,6 +405,7 @@ class Fastconfirm:
             try:
                 gevent.sleep(0)
                 sender,osender ,(o_j, h, pi, c_hB_j, omega_str, sig, rpk_j_byte, rmt_j) = commit_recvs.get_nowait()
+                # print("see sender {} and osender {}: {}".format(sender,osender,sender==osender))
                 count += 1
             except:
                 continue
@@ -403,6 +416,7 @@ class Fastconfirm:
                 self.logger.info("omega set: enter vrify member condition")
                 (s, b) = sig
                 rpk_j=PublicKey(rpk_j_byte)
+                self.logger.debug("see omega_str {} and {}".format(omega_str,str(c_hB_j)))
                 if vrify(s, b, omega_str + str(c_hB_j), rpk_j, rmt_j, ((self.round - 1) * 4) + 3, 1024):
                     self.logger.info("omega set: enter vrify condition {}".format(omega_str+"!!!!!"+str(c_hB_j)))
 
@@ -480,14 +494,24 @@ class Fastconfirm:
                 # print(atx)
                 # self.transaction_buffer.put_nowait(atx)
                 try:
-                    sender, (tag,osender, r, msg) = self._recv()
+                    if self._send_mode is 'gossip':
+                        sender, (tag,osender, r, msg) = self._recv()
+                        self.msglog.info("(gossip) round {} recv {} origin sender {} from {} msg is {}".format(r, tag, osender, sender, msg))
+                        if r not in self._per_round_recv:
+                            self._per_round_recv[r] = Queue()
+                        # Buffer this message
+                        self._per_round_recv[r].put_nowait((sender, (tag, osender, msg)))
+                    else:
+                        sender, (tag, r, msg) = self._recv()
+                        self.msglog.info("(broadcast)round {} recv {} from {} msg is {}".format(r, tag,sender, msg))
+                        if r not in self._per_round_recv:
+                            self._per_round_recv[r] = Queue()
+                            # Buffer this message
+                        self._per_round_recv[r].put_nowait((sender, (tag, sender, msg)))
                     # print('recv '+tag+str((sender, r, msg)))
-                    self.msglog.info("round {} recv {} origin sender {} from {} msg is {}".format(r,tag,osender,sender,msg))
+
                     # Maintain an *unbounded* recv queue for each epoch
-                    if r not in self._per_round_recv:
-                        self._per_round_recv[r] = Queue()
-                    # Buffer this message
-                    self._per_round_recv[r].put_nowait((sender, (tag, osender,msg)))
+
                 except:
                     # print("receive consensus message error")
                     continue

@@ -22,11 +22,13 @@ def commit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, o, omega, c_hB, send, l
     if o > 0:
         position = ((round - 1) * 4) + 3
         sig = sign(rsk[position], str(omega) + str(c_hB), rmt, position)
+        # print("round {} node {} want to sign {} {}".format(round,pid,str(omega),str(c_hB)))
 
     if o == 0:
         # not a valid C
         position = ((round - 1) * 4) + 3
         sig = sign(rsk[position], "null", rmt, position)
+        print("round {} node {} want to sign null".format(round, pid))
 
     t, my_pi, my_h = memselection(round, 4, PK2s[pid], SK2)
     # print("--", pid, h, pi)
@@ -39,5 +41,6 @@ def commit(pid, sid, N, PK2s, SK2, rpk, rsk, rmt, round, o, omega, c_hB, send, l
         # print(pid, "sends", msg)
         return 1
     else:
+        # logger.info("node {} is not selected in round {} commit".format(pid,round))
         # print(pid, "is not selected as a committee member")
         return 0
