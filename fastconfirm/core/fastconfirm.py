@@ -157,7 +157,7 @@ class Fastconfirm:
         self.rsk = [] * 1024
         self.pk_root = 0
         self.rmt = None
-        self.step=''
+        self.step='F_BP'
 
         self._per_round_recv = {}
         '''put 25 transactions initially'''
@@ -238,7 +238,7 @@ class Fastconfirm:
             return vote_send
 
         delta = self.T
-        self.step='F_BP'
+        # self.step='F_BP'
         start = time.time()
         self.logger.info("enter recv block proposal phase at {}".format(start))
         t, my_pi, my_h = memselection(self.round, 2, self.sPK2s[self.id], self.sSK2)
@@ -252,6 +252,7 @@ class Fastconfirm:
             leader_msg = None
             while time.time() - start < delta:
                 gevent.sleep(0)
+            self.step='F_VOTE'
             # print("bp size test",bp_recvs.qsize())
             self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             while bp_recvs.qsize() > 0:
@@ -277,6 +278,7 @@ class Fastconfirm:
             block_dic = {}
             while time.time() - start < delta:
                 gevent.sleep(0)
+            self.step = 'F_VOTE'
             self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             while bp_recvs.qsize()>0:
                 sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
@@ -307,12 +309,12 @@ class Fastconfirm:
 
         # wait for vote msg
         t, my_pi, my_h = memselection(self.round, 3, self.sPK2s[self.id], self.sSK2)
-        self.step='F_VOTE'
         start = time.time()
         self.logger.info("enter recv vote phase at {}".format(start))
         while time.time() - start < delta:
             gevent.sleep(0)
         self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
+        self.step='F_PC'
 
         vote_tag=0
         pc_hB = 0
@@ -353,6 +355,8 @@ class Fastconfirm:
                       self.round, t, my_pi, my_h, 0, None,None,
                       make_pc_send(self.id,self.round))
 
+        # self.step = 'F_PC'
+
         def make_commit_send(original_sender,r):  # this make will automatically deep copy the enclosed send func
             def commit_send(k, o):
                 """CBC send operation.
@@ -371,13 +375,16 @@ class Fastconfirm:
         preset = defaultdict(lambda: Queue())
         o = 0
         count = 0
-        self.step='F_PC'
+
         start = time.time()
         self.logger.info("enter recv precommit phase at {}".format(start))
         c_hB = 0
         c = 0
         while time.time() - start < delta:
             gevent.sleep(0)
+
+        self.step = 'F_COMMIT'
+
         self.logger.info("node {} receive {} pc".format(self.id, pc_recvs.qsize()))
         while pc_recvs.qsize() > 0:
             gevent.sleep(0)
@@ -406,7 +413,7 @@ class Fastconfirm:
         omegaset = defaultdict(lambda: Queue())
         pc = 0
         count = 0
-        self.step='F_COMMIT'
+
         start = time.time()
         self.logger.info("enter recv commit phase at {}".format(start))
         g_hB = -1
