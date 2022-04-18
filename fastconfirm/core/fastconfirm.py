@@ -157,6 +157,7 @@ class Fastconfirm:
         self.rsk = [] * 1024
         self.pk_root = 0
         self.rmt = None
+        self.step=''
 
         self._per_round_recv = {}
         '''put 25 transactions initially'''
@@ -237,7 +238,9 @@ class Fastconfirm:
             return vote_send
 
         delta = self.T
+        self.step='F_BP'
         start = time.time()
+        self.logger.info("enter recv block proposal phase at {}".format(start))
         t, my_pi, my_h = memselection(self.round, 2, self.sPK2s[self.id], self.sSK2)
         B=None
         if t == 1:
@@ -304,7 +307,9 @@ class Fastconfirm:
 
         # wait for vote msg
         t, my_pi, my_h = memselection(self.round, 3, self.sPK2s[self.id], self.sSK2)
+        self.step='F_VOTE'
         start = time.time()
+        self.logger.info("enter recv vote phase at {}".format(start))
         while time.time() - start < delta:
             gevent.sleep(0)
         self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
@@ -366,7 +371,9 @@ class Fastconfirm:
         preset = defaultdict(lambda: Queue())
         o = 0
         count = 0
+        self.step='F_PC'
         start = time.time()
+        self.logger.info("enter recv precommit phase at {}".format(start))
         c_hB = 0
         c = 0
         while time.time() - start < delta:
@@ -399,7 +406,9 @@ class Fastconfirm:
         omegaset = defaultdict(lambda: Queue())
         pc = 0
         count = 0
+        self.step='F_COMMIT'
         start = time.time()
+        self.logger.info("enter recv commit phase at {}".format(start))
         g_hB = -1
         while time.time() - start < delta:
             try:
@@ -496,14 +505,18 @@ class Fastconfirm:
                 try:
                     if self._send_mode is 'gossip':
                         sender, (tag,osender, r, msg) = self._recv()
-                        self.msglog.info("(gossip) round {} recv {} origin sender {} from {} msg is {}".format(r, tag, osender, sender, msg))
+                        # self.msglog.info("(gossip) round {} recv {} origin sender {} from {} msg is {}".format(r, tag, osender, sender, msg))
+                        if tag is not self.step:
+                            continue
                         if r not in self._per_round_recv:
                             self._per_round_recv[r] = Queue()
                         # Buffer this message
                         self._per_round_recv[r].put_nowait((sender, (tag, osender, msg)))
                     else:
                         sender, (tag, r, msg) = self._recv()
-                        self.msglog.info("(broadcast)round {} recv {} from {} msg is {}".format(r, tag,sender, msg))
+                        if tag is not self.step:
+                            continue
+                        # self.msglog.info("(broadcast)round {} recv {} from {} msg is {}".format(r, tag,sender, msg))
                         if r not in self._per_round_recv:
                             self._per_round_recv[r] = Queue()
                             # Buffer this message

@@ -36,7 +36,7 @@ class NetworkServer (Process):
         self.logger.info("my IP is " + self.ip+":"+str(self.port))
 
         def _handler(sock, address):
-            self.logger.debug("handle enter")
+            # self.logger.debug("handle enter")
             jid = self._address_to_id(address)
             buf = b''
             # self.logger.debug("handle enter")

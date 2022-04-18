@@ -51,7 +51,7 @@ class NetworkClient (Process):
                         # self.logger.info("try to connect")
                         self.is_out_sock_connected[j] = self._connect(j)
                         # self.logger.info("is out sock connect {} result {}".format(j,self.is_out_sock_connected[j]))
-                self.logger.debug("all connect {}".format(all(self.is_out_sock_connected)))
+                # self.logger.debug("all connect {}".format(all(self.is_out_sock_connected)))
                 if all(self.is_out_sock_connected):
                     with self.ready.get_lock():
                         self.logger.info("get lock: {}".format(self.ready.get_lock))
