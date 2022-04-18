@@ -75,7 +75,7 @@ BroadcastReceiverQueues = namedtuple(
 def broadcast_receiver_loop(recv_func, recv_queues):
     while True:
         sender, (tag, osender,msg) = recv_func()
-        # print("recv:", sender, tag, msg)
+        print("loop recv:", sender, tag)
         if tag not in BroadcastTag.__members__:
             # TODO Post python 3 port: Add exception chaining.
             # See https://www.python.org/dev/peps/pep-3134/
