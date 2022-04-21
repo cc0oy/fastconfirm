@@ -43,7 +43,7 @@ class NetworkServer (Process):
             try:
                 # self.logger.debug("handle enter and stopvalue is {}".format(self.stop.value))
                 while not self.stop.value:
-                    buf += sock.recv(9000)
+                    buf += sock.recv(36000)
                     tmp = buf.split(self.SEP, 1)
                     while len(tmp) == 2:
                         buf = tmp[1]
