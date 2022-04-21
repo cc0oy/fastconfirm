@@ -157,7 +157,7 @@ class Fastconfirm:
         self.rsk = [] * 1024
         self.pk_root = 0
         self.rmt = None
-        self.step='F_BP'
+        # self.step='F_BP'
 
         self._per_round_recv = {}
         '''put 25 transactions initially'''
@@ -252,7 +252,7 @@ class Fastconfirm:
             leader_msg = None
             while time.time() - start < delta:
                 gevent.sleep(0)
-            self.step='F_VOTE'
+            # self.step='F_VOTE'
             # print("bp size test",bp_recvs.qsize())
             self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             while bp_recvs.qsize() > 0:
@@ -278,7 +278,7 @@ class Fastconfirm:
             block_dic = {}
             while time.time() - start < delta:
                 gevent.sleep(0)
-            self.step = 'F_VOTE'
+            # self.step = 'F_VOTE'
             self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             while bp_recvs.qsize()>0:
                 sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
@@ -314,7 +314,7 @@ class Fastconfirm:
         while time.time() - start < delta:
             gevent.sleep(0)
         self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
-        self.step='F_PC'
+        # self.step='F_PC'
 
         vote_tag=0
         pc_hB = 0
@@ -383,7 +383,7 @@ class Fastconfirm:
         while time.time() - start < delta:
             gevent.sleep(0)
 
-        self.step = 'F_COMMIT'
+        # self.step = 'F_COMMIT'
 
         self.logger.info("node {} receive {} pc".format(self.id, pc_recvs.qsize()))
         while pc_recvs.qsize() > 0:
@@ -513,16 +513,16 @@ class Fastconfirm:
                     if self._send_mode is 'gossip':
                         sender, (tag,osender, r, msg) = self._recv()
                         # self.msglog.info("(gossip) round {} recv {} origin sender {} from {} msg is {}".format(r, tag, osender, sender, msg))
-                        if tag is not self.step:
-                            continue
+                        # if tag is not self.step:
+                        #     continue
                         if r not in self._per_round_recv:
                             self._per_round_recv[r] = Queue()
                         # Buffer this message
                         self._per_round_recv[r].put_nowait((sender, (tag, osender, msg)))
                     else:
                         sender, (tag, r, msg) = self._recv()
-                        if tag is not self.step:
-                            continue
+                        # if tag is not self.step:
+                        #     continue
                         # self.msglog.info("(broadcast)round {} recv {} from {} msg is {}".format(r, tag,sender, msg))
                         if r not in self._per_round_recv:
                             self._per_round_recv[r] = Queue()
