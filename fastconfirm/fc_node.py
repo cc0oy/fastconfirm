@@ -89,8 +89,8 @@ class FastConfirmNode(Fastconfirm):
         self.prepare_bootstrap()
 
         while not self.ready.value:
-            print("self ready value wait")
-            time.sleep(1)
+            print("self ready value wait ")
+            time.sleep(0.001)
             # gevent.sleep(1)
 
         self.run_fast()

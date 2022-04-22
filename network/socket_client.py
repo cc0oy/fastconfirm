@@ -17,7 +17,7 @@ class NetworkClient (Process):
 
     SEP = '\r\nSEP\r\nSEP\r\nSEP\r\n'.encode('utf-8')
 
-    def __init__(self, port: int, my_ip: str, id: int, addresses_list: list, client_from_bft: Callable, client_ready: mpValue, stop: mpValue):
+    def __init__(self, port: int, my_ip: str, id: int, addresses_list: list, client_from_bft: Callable, client_ready: mpValue, stop: mpValue,sync:mpValue):
 
         self.client_from_bft = client_from_bft
         self.ready = client_ready
@@ -34,6 +34,7 @@ class NetworkClient (Process):
         self.socks = [None for _ in self.addresses_list]
         self.sock_queues = [Queue() for _ in self.addresses_list]
         self.sock_locks = [lock.Semaphore() for _ in self.addresses_list]
+        self.sync=sync
 
         super().__init__()
 
@@ -53,9 +54,11 @@ class NetworkClient (Process):
                         # self.logger.info("is out sock connect {} result {}".format(j,self.is_out_sock_connected[j]))
                 # self.logger.debug("all connect {}".format(all(self.is_out_sock_connected)))
                 if all(self.is_out_sock_connected):
+                    self.logger.debug("")
                     with self.ready.get_lock():
                         self.logger.info("get lock: {}".format(self.ready.get_lock))
                         self.ready.value = True
+                        self.sync=True
                     break
             except Exception as e:
                 print(str((e, traceback.print_exc())))
