@@ -141,9 +141,9 @@ if __name__ == '__main__':
 
     # Random generator
     rnd = random.Random(sid)
-
+    start_point=time.time()
     # Nodes list
-    addresses_node, my_address_node = network_config('hosts.config', N, i)
+    addresses_node, my_address_node = network_config('hosts(200).config', N, i)
 
     # port communicated with client
     # addresses_client, my_address_client = network_config('host_client.config', N,i)
@@ -178,8 +178,8 @@ if __name__ == '__main__':
     net_ready = mpValue(c_bool, False)
     stop = mpValue(c_bool, False)
 
-    start_sync=[mpValue(c_bool,False)]*N
-
+    # start_sync = [False] * N
+    # print("see sync {}".format(start_sync))
     # TODO: communication channel to change in some way
     # net_listen = NetworkServer(my_address_client[1], my_address_client[0], i, addresses_client, bft_to_app,
     #                            server_ready, stop)
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     net_server = NetworkServer(my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, server_ready,
                                stop)
     net_client = NetworkClient(my_address_node[1], my_address_node[0], i, addresses_node, client_from_bft, client_ready,
-                               stop,start_sync[i])
+                               stop)
     # net_server = GossipServer(10,my_address_node[1], my_address_node[0], i, addresses_node, server_to_bft, bft_to_client,
     #                           server_ready,
     #                           stop)
@@ -211,12 +211,8 @@ if __name__ == '__main__':
             break
         # print("waiting for network ready with {} {}...".format(client_ready.value, server_ready.value))
 
-    while True:
-        if all(start_sync):
-            print("all connect at {}".format(time.time()))
-            break
-        else:
-            print("waiting connect at")
+    while time.time()-start_point<10:
+        time.sleep(0.0001)
 
     with net_ready.get_lock():
         net_ready.value = True
