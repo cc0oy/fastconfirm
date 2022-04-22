@@ -143,7 +143,7 @@ if __name__ == '__main__':
     rnd = random.Random(sid)
 
     # Nodes list
-    addresses_node, my_address_node = network_config('hosts(200).config', N, i)
+    addresses_node, my_address_node = network_config('hosts.config', N, i)
 
     # port communicated with client
     # addresses_client, my_address_client = network_config('host_client.config', N,i)
