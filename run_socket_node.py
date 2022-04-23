@@ -138,10 +138,11 @@ if __name__ == '__main__':
     F = args.F
     D = args.D
     O = args.O
-
+    start_point = time.time()
+    print("execute script at {}".format(start_point))
     # Random generator
     rnd = random.Random(sid)
-    start_point=time.time()
+
     # Nodes list
     addresses_node, my_address_node = network_config('hosts.config', N, i)
 
@@ -171,7 +172,7 @@ if __name__ == '__main__':
     for _ in range(4000):
         atx = tx_generator(250)
         server_app_mpq.put_nowait(atx)
-    print("have put {} txs".format(server_app_mpq.qsize()))
+    print("have put {} txs at time {}".format(server_app_mpq.qsize(),time.time()))
 
     client_ready = mpValue(c_bool, False)
     server_ready = mpValue(c_bool, False)
