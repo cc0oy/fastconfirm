@@ -75,7 +75,7 @@ BroadcastReceiverQueues = namedtuple(
 def broadcast_receiver_loop(recv_func, recv_queues):
     while True:
         sender, (tag, osender,msg) = recv_func()
-        print("loop recv:", sender, tag)
+        print("classify recv:", sender, tag)
         if tag not in BroadcastTag.__members__:
             # TODO Post python 3 port: Add exception chaining.
             # See https://www.python.org/dev/peps/pep-3134/
@@ -510,6 +510,7 @@ class Fastconfirm:
                 # print(atx)
                 # self.transaction_buffer.put_nowait(atx)
                 try:
+                    '''
                     if self._send_mode is 'gossip':
                         sender, (tag,osender, r, msg) = self._recv()
                         # self.msglog.info("(gossip) round {} recv {} origin sender {} from {} msg is {}".format(r, tag, osender, sender, msg))
@@ -519,15 +520,16 @@ class Fastconfirm:
                             self._per_round_recv[r] = Queue()
                         # Buffer this message
                         self._per_round_recv[r].put_nowait((sender, (tag, osender, msg)))
-                    else:
-                        sender, (tag, r, msg) = self._recv()
-                        # if tag is not self.step:
-                        #     continue
-                        # self.msglog.info("(broadcast)round {} recv {} from {} msg is {}".format(r, tag,sender, msg))
-                        if r not in self._per_round_recv:
-                            self._per_round_recv[r] = Queue()
-                            # Buffer this message
-                        self._per_round_recv[r].put_nowait((sender, (tag, sender, msg)))
+                    else:'''
+                    sender, (tag, r, msg) = self._recv()
+                    print("recv loop: sender {} {}".format(sender,tag))
+                    # if tag is not self.step:
+                    #     continue
+                    # self.msglog.info("(broadcast)round {} recv {} from {} msg is {}".format(r, tag,sender, msg))
+                    if r not in self._per_round_recv:
+                        self._per_round_recv[r] = Queue()
+                        # Buffer this message
+                    self._per_round_recv[r].put_nowait((sender, (tag, sender, msg)))
                     # print('recv '+tag+str((sender, r, msg)))
 
                     # Maintain an *unbounded* recv queue for each epoch
@@ -539,8 +541,9 @@ class Fastconfirm:
         self._recv_thread.start()
 
 
+        '''
         def _txs_loop():
-            '''receive transactions'''
+            # receive transactions
             # print("node {} start to receive transactions".format(self.id))
             while True:
                 # print("node {} enter receive transactions loop".format(self.id))
@@ -557,7 +560,7 @@ class Fastconfirm:
 
         self._recv_txs_thread=Greenlet(_txs_loop)
         self._recv_txs_thread.start()
-
+        '''
 
         # print(self.id,"start consensus with txs:",self.transaction_buffer.qsize())
         while self.round <= self.SLOTS_NUM:
