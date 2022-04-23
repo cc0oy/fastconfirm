@@ -139,6 +139,8 @@ if __name__ == '__main__':
     D = args.D
     O = args.O
     start_point = time.time()
+    while time.time() < 1650703727.572784:
+        time.sleep(0.0001)
     print("execute script at {}".format(start_point))
     # Random generator
     rnd = random.Random(sid)
@@ -172,7 +174,7 @@ if __name__ == '__main__':
     for _ in range(4000):
         atx = tx_generator(250)
         server_app_mpq.put_nowait(atx)
-    print("have put {} txs at time {}".format(server_app_mpq.qsize(),time.time()))
+    print("have put {} txs at time {}".format(server_app_mpq.qsize(), time.time()))
 
     client_ready = mpValue(c_bool, False)
     server_ready = mpValue(c_bool, False)
@@ -212,7 +214,7 @@ if __name__ == '__main__':
             break
         # print("waiting for network ready with {} {}...".format(client_ready.value, server_ready.value))
 
-    while time.time()-start_point<10:
+    while time.time() - start_point < 10:
         time.sleep(0.0001)
 
     with net_ready.get_lock():
