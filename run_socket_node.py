@@ -138,9 +138,10 @@ if __name__ == '__main__':
     F = args.F
     D = args.D
     O = args.O
-    start_point = time.time()
-    while time.time() < 1650703727.572784:
+
+    while time.time() < 1650703727.572:
         time.sleep(0.0001)
+    start_point = time.time()
     print("execute script at {}".format(start_point))
     # Random generator
     rnd = random.Random(sid)
@@ -214,8 +215,6 @@ if __name__ == '__main__':
             break
         # print("waiting for network ready with {} {}...".format(client_ready.value, server_ready.value))
 
-    while time.time() - start_point < 10:
-        time.sleep(0.0001)
 
     with net_ready.get_lock():
         net_ready.value = True
