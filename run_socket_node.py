@@ -139,10 +139,9 @@ if __name__ == '__main__':
     D = args.D
     O = args.O
 
-    while time.time() < 1650703727.572:
-        time.sleep(0.0001)
+
     start_point = time.time()
-    print("execute script at {}".format(start_point))
+    # print("execute script at {}".format(start_point))
     # Random generator
     rnd = random.Random(sid)
 
@@ -218,6 +217,9 @@ if __name__ == '__main__':
 
     with net_ready.get_lock():
         net_ready.value = True
+
+    while time.time() < 1650703727.572:
+        time.sleep(0.0001)
 
     print("see the bft start time {}".format(time.time()))
     bft_thread = Greenlet(bft.run)
