@@ -522,10 +522,10 @@ class Fastconfirm:
                         self._per_round_recv[r].put_nowait((sender, (tag, osender, msg)))
                     else:'''
                     sender, (tag, r, msg) = self._recv()
-                    print("recv loop: sender {} {}".format(sender,tag))
+                    self.msglog.info("recv loop: sender {} {}".format(sender,tag))
                     # if tag is not self.step:
                     #     continue
-                    # self.msglog.info("(broadcast)round {} recv {} from {} msg is {}".format(r, tag,sender, msg))
+                    # self.msglog.info("(broadcast)recv {} from {}".format(tag,sender))
                     if r not in self._per_round_recv:
                         self._per_round_recv[r] = Queue()
                         # Buffer this message
