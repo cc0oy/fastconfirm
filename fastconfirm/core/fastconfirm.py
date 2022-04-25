@@ -284,7 +284,7 @@ class Fastconfirm:
             maxh = 0
             block_dic = {}
             while time.time() - start < delta:
-                gevent.sleep(0)
+                gevent.sleep(0.2)
             # self.step = 'F_VOTE'
             # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             self.logger.info("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
@@ -323,7 +323,7 @@ class Fastconfirm:
         start = time.time()
         self.logger.info("enter recv vote phase at {}".format(start))
         while time.time() - start < delta:
-            gevent.sleep(0)
+            gevent.sleep(0.2)
         # self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
         self.logger.info("node {} receive {} votes".format(self.id, self._per_vote[self.round].qsize()))
         # self.step='F_PC'
@@ -364,7 +364,7 @@ class Fastconfirm:
                       make_pc_send(self.id,self.round))
         else:
             while time.time() - start < delta:
-                gevent.sleep(0)
+                gevent.sleep(0.2)
             precommit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                       self.round, t, my_pi, my_h, 0, None,None,
                       make_pc_send(self.id,self.round))
@@ -395,7 +395,7 @@ class Fastconfirm:
         c_hB = 0
         c = 0
         while time.time() - start < delta:
-            gevent.sleep(0)
+            gevent.sleep(0.2)
 
         # self.step = 'F_COMMIT'
 
