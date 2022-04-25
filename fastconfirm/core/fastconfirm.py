@@ -160,6 +160,10 @@ class Fastconfirm:
         # self.step='F_BP'
 
         self._per_round_recv = {}
+        self._per_bp={}
+        self._per_vote = {}
+        self._per_pc = {}
+        self._per_commit = {}
         '''put 25 transactions initially'''
         for _ in range(4000):
             atx = tx_generator(25)
@@ -184,19 +188,19 @@ class Fastconfirm:
 
     def fastconfirm_round(self):
         print("start consensus")
-        bp_recvs = Queue()
-        vote_recvs = Queue()
-        pc_recvs = Queue()
-        commit_recvs = Queue()
+        # bp_recvs = Queue()
+        # vote_recvs = Queue()
+        # pc_recvs = Queue()
+        # commit_recvs = Queue()
 
-        recv_queues = BroadcastReceiverQueues(
-            F_BP=bp_recvs,
-            F_VOTE=vote_recvs,
-            F_PC=pc_recvs,
-            F_COMMIT=commit_recvs
-        )
-        recv_loop_thred = Greenlet(broadcast_receiver_loop, self._per_round_recv[self.round].get, recv_queues)
-        recv_loop_thred.start()
+        # recv_queues = BroadcastReceiverQueues(
+        #     F_BP=bp_recvs,
+        #     F_VOTE=vote_recvs,
+        #     F_PC=pc_recvs,
+        #     F_COMMIT=commit_recvs
+        # )
+        # recv_loop_thred = Greenlet(broadcast_receiver_loop, self._per_round_recv[self.round].get, recv_queues)
+        # recv_loop_thred.start()
 
         while self.input.empty() is not True:
             self.input.get()
@@ -254,10 +258,13 @@ class Fastconfirm:
                 gevent.sleep(0)
             # self.step='F_VOTE'
             # print("bp size test",bp_recvs.qsize())
-            self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
-            while bp_recvs.qsize() > 0:
+            # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
+            # while bp_recvs.qsize() > 0:
+            self.logger.info("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
+            while self._per_bp[self.round].qsize()>0:
                 gevent.sleep(0)
-                sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
+                # sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
+                sender, osender, (g, h, pi, B, hB, height, sig) = self._per_bp[self.round].get()
                 # print(sender, " ",osender,(g, h, pi, B, hB, height, sig))
                 if lg == 2 or (lg == 1 and self.lastcommit == 1):
                     if g == 0:
@@ -279,9 +286,13 @@ class Fastconfirm:
             while time.time() - start < delta:
                 gevent.sleep(0)
             # self.step = 'F_VOTE'
-            self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
-            while bp_recvs.qsize()>0:
-                sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
+            # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
+            self.logger.info("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
+            # while bp_recvs.qsize()>0:
+            #     sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
+            while self._per_bp[self.round].qsize()>0:
+                gevent.sleep(0)
+                sender, osender, (g, h, pi, B, hB, height, sig) = self._per_bp[self.round].get()
                 block_dic[osender]=(g, h, pi, B, hB, height, sig)
                 if lg == 2 or (lg == 1 and self.lastcommit == 1):
                     if g == 0:
@@ -313,7 +324,8 @@ class Fastconfirm:
         self.logger.info("enter recv vote phase at {}".format(start))
         while time.time() - start < delta:
             gevent.sleep(0)
-        self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
+        # self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
+        self.logger.info("node {} receive {} votes".format(self.id, self._per_vote[self.round].qsize()))
         # self.step='F_PC'
 
         vote_tag=0
@@ -322,10 +334,12 @@ class Fastconfirm:
             voteset = defaultdict(lambda: Queue())
             c = 0
             count = 0
-            while vote_recvs.qsize() > 0:
+            # while vote_recvs.qsize() > 0:
+            while self._per_vote[self.round].qsize():
                 # print("node", self.id, "vote_recv queue size", vote_recvs.qsize(),"in round",self.round)
                 gevent.sleep(0)
-                sender, osender,(g, h, pi, hB, height, sig) = vote_recvs.get()
+                # sender, osender,(g, h, pi, hB, height, sig) = vote_recvs.get()
+                sender, osender, (g, h, pi, hB, height, sig) = self._per_vote[self.round].get()
                 # test_certain_key(sender,"test",self.sPK2s[sender])
                 # print("node",self.id,"recv from",sender,pi,h,str(self.sPK2s[sender]))
                 # print("node {} verify vote member {} from {}".format(self.id,vrifymember(self.round, 2, h, pi, self.sPK2s[osender]),osender))
@@ -385,10 +399,13 @@ class Fastconfirm:
 
         # self.step = 'F_COMMIT'
 
-        self.logger.info("node {} receive {} pc".format(self.id, pc_recvs.qsize()))
-        while pc_recvs.qsize() > 0:
+        # self.logger.info("node {} receive {} pc".format(self.id, pc_recvs.qsize()))
+        self.logger.info("node {} receive {} pc".format(self.id, self._per_pc[self.round].qsize()))
+        # while pc_recvs.qsize() > 0:
+        while self._per_pc[self.round].qsize()>0:
             gevent.sleep(0)
-            sender, osender,(g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
+            # sender, osender,(g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
+            sender, osender, (g, h, pi, pc_hB, vote_set, sig) = self._per_pc[self.round].get()
             print("node {} in round {} pc set verify vote_set len: {}".format(self.id,self.round,len(vote_set)))
             # print("node {} in round {} 3 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 3, h, pi, self.sPK2s[osender]),sender))
             if vrifymember(self.round, 3, h, pi, self.sPK2s[osender]) and len(vote_set)>=2*self.f+1:
@@ -420,7 +437,8 @@ class Fastconfirm:
         while time.time() - start < delta:
             try:
                 gevent.sleep(0)
-                sender,osender ,(o_j, h, pi, c_hB_j, omega_str, sig, rpk_j_byte, rmt_j) = commit_recvs.get_nowait()
+                sender,osender ,(o_j, h, pi, c_hB_j, omega_str, sig, rpk_j_byte, rmt_j) = self._per_commit[self.round].get_nowait()
+                # sender, osender, (o_j, h, pi, c_hB_j, omega_str, sig, rpk_j_byte, rmt_j) = commit_recvs.get_nowait()
                 # print("see sender {} and osender {}: {}".format(sender,osender,sender==osender))
                 count += 1
             except:
@@ -526,10 +544,28 @@ class Fastconfirm:
                     # if tag is not self.step:
                     #     continue
                     # self.msglog.info("(broadcast)recv {} from {}".format(tag,sender))
-                    if r not in self._per_round_recv:
-                        self._per_round_recv[r] = Queue()
-                        # Buffer this message
-                    self._per_round_recv[r].put_nowait((sender, (tag, sender, msg)))
+                    # if r not in self._per_round_recv:
+                    #     self._per_round_recv[r] = Queue()
+                    #     # Buffer this message
+                    # self._per_round_recv[r].put_nowait((sender, (tag, sender, msg)))
+                    if tag == 'F_BP':
+                        if r not in self._per_bp:
+                            self._per_bp[r]=Queue()
+                        self._per_bp[r].put_nowait((sender,sender,msg))
+                    elif tag == 'F_VOTE':
+                        if r not in self._per_vote:
+                            self._per_vote[r]=Queue()
+                        self._per_vote[r].put_nowait((sender,sender,msg))
+                    elif tag == 'F_PC':
+                        if r not in self._per_pc:
+                            self._per_pc[r]=Queue()
+                        self._per_pc[r].put_nowait((sender,sender,msg))
+                    elif tag == 'F_COMMIT':
+                        if r not in self._per_commit:
+                            self._per_commit[r]=Queue()
+                        self._per_commit[r].put_nowait((sender,sender,msg))
+                    else:
+                        print("tag error with value {}".format(tag))
                     # print('recv '+tag+str((sender, r, msg)))
 
                     # Maintain an *unbounded* recv queue for each epoch
@@ -569,6 +605,10 @@ class Fastconfirm:
             # print(self.id,str(self.sPK2s[0].format()),str(self.sPK2s[1].format()),str(self.sPK2s[2].format()),str(self.sPK2s[3].format()))
             if self.round not in self._per_round_recv:
                 self._per_round_recv[self.round] = Queue()
+                self._per_bp[self.round]=Queue()
+                self._per_vote[self.round] = Queue()
+                self._per_pc[self.round] = Queue()
+                self._per_commit[self.round] = Queue()
             st = time.time()
             self.fastconfirm_round()
             self.logger.info("finish round {} with in {} seconds".format(self.round-1,time.time()-st))
