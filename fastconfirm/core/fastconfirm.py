@@ -255,7 +255,7 @@ class Fastconfirm:
             leader = 0
             leader_msg = None
             while time.time() - start < delta:
-                gevent.sleep(0)
+                gevent.sleep(0.2)
             # self.step='F_VOTE'
             # print("bp size test",bp_recvs.qsize())
             # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
@@ -522,7 +522,7 @@ class Fastconfirm:
             """Receive messages."""
             #print("start recv loop...")
             while True:
-                #gevent.sleep(0)
+                # gevent.sleep(0)
                 # atx=self._recv_txs()
                 # print("receive transaction".format(atx))
                 # print(atx)
