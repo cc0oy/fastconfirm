@@ -51,7 +51,11 @@ class NetworkServer (Process):
                         if data != '' and data:
                             (j, o) = (jid, pickle.loads(data))
                             # assert j in range(self.N)
-                            self.server_to_bft((j, o))
+                            try:
+                                self.server_to_bft((j, o))
+                            except Exception as e:
+                                self.elogger.debug("queue empty and provoke error")
+                                continue
                             self.logger.info('recv' + str((j, o)))
                             # print('recv' + str((j, o)))
                         else:
@@ -76,6 +80,7 @@ class NetworkServer (Process):
         pid = os.getpid()
         self.logger = self._set_server_logger(self.id)
         self.logger.info('node id %d is running on pid %d' % (self.id, pid))
+        self.elogger=self._set_error_logger(self.id)
         with self.ready.get_lock():
             self.ready.value = False
         # self.ready.value=True
@@ -99,6 +104,20 @@ class NetworkServer (Process):
         if 'log' not in os.listdir(os.getcwd()):
             os.mkdir(os.getcwd() + '/log')
         full_path = os.path.realpath(os.getcwd()) + '/log/' + "node-net-server-" + str(id) + ".log"
+        file_handler = logging.FileHandler(full_path)
+        file_handler.setFormatter(formatter)  # 可以通过setFormatter指定输出格式
+        logger.addHandler(file_handler)
+        return logger
+
+    def _set_error_logger(self, id: int):
+        logger = logging.getLogger("node-server-error" + str(id))
+        logger.setLevel(logging.DEBUG)
+        # logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            '%(asctime)s %(filename)s [line:%(lineno)d] %(funcName)s %(levelname)s %(message)s ')
+        if 'log' not in os.listdir(os.getcwd()):
+            os.mkdir(os.getcwd() + '/log')
+        full_path = os.path.realpath(os.getcwd()) + '/log/' + "node-error-server-" + str(id) + ".log"
         file_handler = logging.FileHandler(full_path)
         file_handler.setFormatter(formatter)  # 可以通过setFormatter指定输出格式
         logger.addHandler(file_handler)
