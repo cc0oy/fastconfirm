@@ -249,7 +249,7 @@ class Fastconfirm:
         B=None
         if t == 1:
             # wait for bp finish
-            # print(start)
+            print("{} is selected in vote".format(self.id))
             (b, r, lg) = self.state
             maxh = 0
             leader = 0
@@ -260,7 +260,7 @@ class Fastconfirm:
             # print("bp size test",bp_recvs.qsize())
             # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             # while bp_recvs.qsize() > 0:
-            self.logger.info("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
+            print("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
             while self._per_bp[self.round].qsize()>0:
                 gevent.sleep(0)
                 # sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
@@ -287,7 +287,7 @@ class Fastconfirm:
                 gevent.sleep(0.2)
             # self.step = 'F_VOTE'
             # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
-            self.logger.info("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
+            print("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
             # while bp_recvs.qsize()>0:
             #     sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
             while self._per_bp[self.round].qsize()>0:
@@ -325,17 +325,18 @@ class Fastconfirm:
         while time.time() - start < delta:
             gevent.sleep(0.2)
         # self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
-        self.logger.info("node {} receive {} votes".format(self.id, self._per_vote[self.round].qsize()))
+        print("node {} receive {} votes".format(self.id, self._per_vote[self.round].qsize()))
         # self.step='F_PC'
 
         vote_tag=0
         pc_hB = 0
         if t == 1:
+            print("{} is selected in precommit".format(self.id))
             voteset = defaultdict(lambda: Queue())
             c = 0
             count = 0
             # while vote_recvs.qsize() > 0:
-            while self._per_vote[self.round].qsize():
+            while self._per_vote[self.round].qsize()>0:
                 # print("node", self.id, "vote_recv queue size", vote_recvs.qsize(),"in round",self.round)
                 gevent.sleep(0)
                 # sender, osender,(g, h, pi, hB, height, sig) = vote_recvs.get()
@@ -353,8 +354,8 @@ class Fastconfirm:
                         pc_hB = hB
                         vote_tag=1
                         c = 1
-            self.logger.info("see vote list: {}".format(voteset.keys()))
-            self.logger.info("voteset length {}".format(len(voteset)))
+            print("see vote list: {}".format(voteset.keys()))
+            print("voteset length {}".format(len(voteset)))
             if c == 1:
                 print("node {} in round {} get a valid vote set".format(self.id,self.round))
             else:
@@ -363,8 +364,34 @@ class Fastconfirm:
                       self.round, t, my_pi, my_h, c, pc_hB,voteset[pc_hB],
                       make_pc_send(self.id,self.round))
         else:
-            while time.time() - start < delta:
-                gevent.sleep(0.2)
+            voteset = defaultdict(lambda: Queue())
+            c = 0
+            count = 0
+            # while vote_recvs.qsize() > 0:
+            while self._per_vote[self.round].qsize() > 0:
+                # print("node", self.id, "vote_recv queue size", vote_recvs.qsize(),"in round",self.round)
+                gevent.sleep(0)
+                # sender, osender,(g, h, pi, hB, height, sig) = vote_recvs.get()
+                sender, osender, (g, h, pi, hB, height, sig) = self._per_vote[self.round].get()
+                # test_certain_key(sender,"test",self.sPK2s[sender])
+                # print("node",self.id,"recv from",sender,pi,h,str(self.sPK2s[sender]))
+                # print("node {} verify vote member {} from {}".format(self.id,vrifymember(self.round, 2, h, pi, self.sPK2s[osender]),osender))
+                if vrifymember(self.round, 2, h, pi, self.sPK2s[osender]):
+                    (s, b) = sig
+                    # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
+                    voteset[hB].put(sig)
+                    # print("round",self.round,"node",self.id,"votesize:",voteset[hB].qsize())
+                    if voteset[hB].qsize() >= (2 * self.f + 1):
+                        # print("node {} in round {} get {} votes with hB{}".format(self.id,self.round,voteset[hB].qsize(),hB))
+                        pc_hB = hB
+                        vote_tag = 1
+                        c = 1
+            print("see vote list: {}".format(voteset.keys()))
+            print("voteset length {}".format(len(voteset)))
+            if c == 1:
+                print("node {} in round {} get a valid vote set".format(self.id, self.round))
+            else:
+                print("node {} in round {} not valid vote set".format(self.id, self.round))
             precommit(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                       self.round, t, my_pi, my_h, 0, None,None,
                       make_pc_send(self.id,self.round))
@@ -400,7 +427,7 @@ class Fastconfirm:
         # self.step = 'F_COMMIT'
 
         # self.logger.info("node {} receive {} pc".format(self.id, pc_recvs.qsize()))
-        self.logger.info("node {} receive {} pc".format(self.id, self._per_pc[self.round].qsize()))
+        print("node {} receive {} pc".format(self.id, self._per_pc[self.round].qsize()))
         # while pc_recvs.qsize() > 0:
         while self._per_pc[self.round].qsize()>0:
             gevent.sleep(0)
@@ -417,7 +444,7 @@ class Fastconfirm:
                     # print("{} pc in round {} with pc_hB {}".format(preset[pc_hB].qsize(),self.round,pc_hB))
                     c_hB = pc_hB
                     o = 1
-        self.logger.info("pcset length {}".format(len(preset)))
+        print("pcset length {}".format(len(preset)))
         if o == 1:
             print("node {} in round {} get a valid omega set".format(self.id,self.round))
         else:
@@ -461,8 +488,8 @@ class Fastconfirm:
                         g_hB = c_hB_j
                         pc = 1
 
-        self.logger.info("node {} receive {} commit".format(self.id,count))
-        self.logger.info("commit set length {} and key is {}".format(len(omegaset),omegaset.keys()))
+        print("node {} receive {} commit".format(self.id,count))
+        print("commit set length {} and key is {}".format(len(omegaset),omegaset.keys()))
         if pc == 1:
             print("node {} get a valid PC set".format(self.id))
         else:
@@ -488,13 +515,13 @@ class Fastconfirm:
                 self.logger.info("round does not collects enough votes")
         else:
             (h_s, round_s, g_s) = self.state
-            self.logger.info("round {} state info g_s={}".format(self.round,g_s))
+            print("round {} state info g_s={}".format(self.round,g_s))
             if g_s == 2:
                 if hash(self.lB) == B[0]:
                     self.height += 1
                     # print("output in round ", self.round, B)
                     self.logger.info("commit in round {}: {} by hash(lB)=B".format(self.round, B))
-                    print("commit in round {}: {} by hash(lB)=B".format(self.round, B))
+                    # print("commit in round {}: {} by hash(lB)=B".format(self.round, B))
                     self.lastcommit = 1
                     self.lB = B
                 else:
@@ -503,10 +530,10 @@ class Fastconfirm:
                         self.height += 1
                         # print("output in round ", self.round, tB)
                         self.logger.info("commit in round {}: {} by to commit".format(self.round,tB) )
-                        print("commit in round {}: {} by to commit".format(self.round, tB))
+                        # print("commit in round {}: {} by to commit".format(self.round, tB))
                     self.height += 1
                     # print("output in round ", self.round, B)
-                    print("commit in round {}: {} just =2".format(self.round, B))
+                    # print("commit in round {}: {} just =2".format(self.round, B))
                     self.logger.info("commit in round {}: {} just =2".format(self.round, B))
                     self.lastcommit = 1
                     self.lB = B
@@ -614,4 +641,4 @@ class Fastconfirm:
             self.logger.info("finish round {} with in {} seconds".format(self.round-1,time.time()-st))
             time.sleep(0.1)
         print("end normal")
-        self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        # self.logger.debug("---------------------------------------------")
