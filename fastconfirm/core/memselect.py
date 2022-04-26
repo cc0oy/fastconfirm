@@ -10,7 +10,7 @@ from crypto.ecdsa import ecdsa
 
 
 
-def memselection(r, s, pk, sk, k=4, T=1):
+def memselection(r, s, pk, sk, k=4, T=0.8):
     threshold = pow(2, (k - 1) * 8)*(1 - T)
     pi, h = VRF_prove(pk, sk,str(r)+str(s), k)
     if int.from_bytes(h, 'big') > threshold:
@@ -19,7 +19,7 @@ def memselection(r, s, pk, sk, k=4, T=1):
     else:
         return 0, pi, h
 
-def vrifymember(r, s, h, pi, pk, k=4, T=1):
+def vrifymember(r, s, h, pi, pk, k=4, T=0.8):
     threshold = pow(2, (k - 1) * 8) * (1 - T)
     if VRF_verifying(pk, pi, h, str(r)+str(s), k):
         if int.from_bytes(h, 'big') > threshold:

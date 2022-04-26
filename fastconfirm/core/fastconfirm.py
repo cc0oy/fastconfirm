@@ -119,7 +119,7 @@ class Fastconfirm:
         self.id = pid
         self.SLOTS_NUM = S
         self.N = N
-        self.f = f
+        self.f = f*0.8
         self.sPK2s = sPK2s
         self.sSK2 = sSK2
         self._send = send
@@ -276,7 +276,7 @@ class Fastconfirm:
                     # print(pid, "change:", leader)
                     leader_msg = (g, h, pi, B, hB, height, sig)
             self.logger.info("get the leader: {} chosen {} block is {}".format(leader, leader_msg[4],leader_msg))
-            print(self.id, "get the leader:", leader, "chosen block is:", leader_msg)
+            # print(self.id, "get the leader:", leader, "chosen block is:", leader_msg)
             vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                  self.round, t, my_pi, my_h, leader_msg, make_vote_send(self.id,self.round))
         else:
@@ -349,7 +349,7 @@ class Fastconfirm:
                     voteset[hB].put(sig)
                     # print("round",self.round,"node",self.id,"votesize:",voteset[hB].qsize())
                     if voteset[hB].qsize() >= (2 * self.f + 1):
-                        self.logger.info("node {} in round {} get {} votes with hB{}".format(self.id,self.round,voteset[hB].qsize(),hB))
+                        # print("node {} in round {} get {} votes with hB{}".format(self.id,self.round,voteset[hB].qsize(),hB))
                         pc_hB = hB
                         vote_tag=1
                         c = 1
@@ -406,15 +406,15 @@ class Fastconfirm:
             gevent.sleep(0)
             # sender, osender,(g, h, pi, pc_hB, vote_set,sig) = pc_recvs.get()
             sender, osender, (g, h, pi, pc_hB, vote_set, sig) = self._per_pc[self.round].get()
-            print("node {} in round {} pc set verify vote_set len: {}".format(self.id,self.round,len(vote_set)))
+            # print("node {} in round {} pc set verify vote_set len: {}".format(self.id,self.round,len(vote_set)))
             # print("node {} in round {} 3 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 3, h, pi, self.sPK2s[osender]),sender))
             if vrifymember(self.round, 3, h, pi, self.sPK2s[osender]) and len(vote_set)>=2*self.f+1:
-                self.logger.info("pc set: enter vrify member condition")
+                # self.logger.info("pc set: enter vrify member condition")
                 (s, b) = sig
                 # assert vrify(s, b, hB, sPK2s[sender], rmt, ((round - 1) * 4) + 1, 1024)
                 preset[pc_hB].put((osender, h, pi, sig))
                 if preset[pc_hB].qsize() >= (2 * self.f + 1):   #find a 2f+1 precommit set
-                    self.logger.info("{} pc in round {} with pc_hB {}".format(preset[pc_hB].qsize(),self.round,pc_hB))
+                    # print("{} pc in round {} with pc_hB {}".format(preset[pc_hB].qsize(),self.round,pc_hB))
                     c_hB = pc_hB
                     o = 1
         self.logger.info("pcset length {}".format(len(preset)))
@@ -447,17 +447,17 @@ class Fastconfirm:
 
             # print("node {} in round {} 4 verify member {} from {}".format(self.id,self.round,vrifymember(self.round, 4, h, pi, self.sPK2s[osender]),sender))
             if vrifymember(self.round, 4, h, pi, self.sPK2s[osender]):
-                self.logger.info("omega set: enter vrify member condition")
+                # self.logger.info("omega set: enter vrify member condition")
                 (s, b) = sig
                 rpk_j=PublicKey(rpk_j_byte)
-                self.logger.debug("see omega_str {} and {}".format(omega_str,str(c_hB_j)))
+                # self.logger.debug("see omega_str {} and {}".format(omega_str,str(c_hB_j)))
                 if vrify(s, b, omega_str + str(c_hB_j), rpk_j, rmt_j, ((self.round - 1) * 4) + 3, 1024):
-                    self.logger.info("omega set: enter vrify condition {}".format(omega_str+"!!!!!"+str(c_hB_j)))
+                    # self.logger.info("omega set: enter vrify condition {}".format(omega_str+"!!!!!"+str(c_hB_j)))
 
                     omegaset[c_hB_j].put((osender, h, pi, omega_str, sig))
                     if omegaset[c_hB_j].qsize() >= (2*self.f+1) :    #precommit set set
                         # print("PC set: g_hB=c_hB")
-                        self.logger.info("{} commit in round {} with c_hB {}".format(omegaset[c_hB].qsize(), self.round,c_hB))
+                        # print("{} commit in round {} with c_hB {}".format(omegaset[c_hB].qsize(), self.round,c_hB))
                         g_hB = c_hB_j
                         pc = 1
 
@@ -469,7 +469,7 @@ class Fastconfirm:
             # print("round {} node {}: dict size{}, omegaset[c_hb]{}".format(self.round,self.id, len(omegaset), omegaset[c_hB].qsize()))
             print("node {} not a valid PC set".format(self.id))
 
-        self.logger.info("{} judge c_hB=g_hB {}={}?".format(c_hB==g_hB,c_hB,g_hB))
+        # self.logger.info("{} judge c_hB=g_hB {}={}?".format(c_hB==g_hB,c_hB,g_hB))
         if c_hB == g_hB:
             self.state = (g_hB, self.round, 2)
         elif (c_hB != g_hB and pc == 1) or (o == 0 and pc == 1):
@@ -481,7 +481,7 @@ class Fastconfirm:
         if self.round == 1:
             '''round1 block directly committed'''
             if vote_tag==1:
-                self.logger.info("output round {} directly {}".format(self.round, B))
+                self.logger.info("output round {} {}".format(self.round, B))
                 # print("output in round 1",B)
                 self.lB=B
             else:
