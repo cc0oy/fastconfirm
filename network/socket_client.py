@@ -56,7 +56,8 @@ class NetworkClient (Process):
                 if all(self.is_out_sock_connected):
                     self.logger.debug("")
                     with self.ready.get_lock():
-                        self.logger.info("get lock: {}".format(self.ready.get_lock))
+                        self.logger.info("have connected with {} nodes".format(self.N))
+                        self.logger.debug("get lock: {}".format(self.ready.get_lock))
                         self.ready.value = True
                         # sync=True
                     break
