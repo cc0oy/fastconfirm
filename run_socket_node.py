@@ -220,7 +220,7 @@ if __name__ == '__main__':
     with net_ready.get_lock():
         net_ready.value = True
 
-    while time.time() < 1650982088.634368:
+    while time.time() < 1651039876.860948:
         time.sleep(0.0001)
 
     print("see the bft start time {}".format(time.time()))
