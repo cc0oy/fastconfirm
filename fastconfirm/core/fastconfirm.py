@@ -119,7 +119,7 @@ class Fastconfirm:
         self.id = pid
         self.SLOTS_NUM = S
         self.N = N
-        self.f = f*0.6
+        self.f = f*0.5
         self.sPK2s = sPK2s
         self.sSK2 = sSK2
         self._send = send
@@ -255,7 +255,7 @@ class Fastconfirm:
             leader = 0
             leader_msg = None
             while time.time() - start < delta:
-                gevent.sleep(0.1)
+                gevent.sleep(0.09)
             # self.step='F_VOTE'
             # print("bp size test",bp_recvs.qsize())
             # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
@@ -284,7 +284,7 @@ class Fastconfirm:
             maxh = 0
             block_dic = {}
             while time.time() - start < delta:
-                gevent.sleep(0.1)
+                gevent.sleep(0.09)
             # self.step = 'F_VOTE'
             # self.logger.info("node {} receive {} proposals".format(self.id, bp_recvs.qsize()))
             print("node {} receive {} proposals".format(self.id, self._per_bp[self.round].qsize()))
@@ -323,7 +323,7 @@ class Fastconfirm:
         start = time.time()
         self.logger.info("enter recv vote phase at {}".format(start))
         while time.time() - start < delta:
-            gevent.sleep(0.1)
+            gevent.sleep(0.09)
         # self.logger.info("node {} receive {} votes".format(self.id, vote_recvs.qsize()))
         print("node {} receive {} votes".format(self.id, self._per_vote[self.round].qsize()))
         # self.step='F_PC'
@@ -422,7 +422,7 @@ class Fastconfirm:
         c_hB = 0
         c = 0
         while time.time() - start < delta:
-            gevent.sleep(0.1)
+            gevent.sleep(0.09)
 
         # self.step = 'F_COMMIT'
 
@@ -638,6 +638,7 @@ class Fastconfirm:
                 self._per_commit[self.round] = Queue()
             st = time.time()
             self.fastconfirm_round()
+            print("finish round {} with in {} seconds".format(self.round - 1, time.time() - st))
             self.logger.info("finish round {} with in {} seconds".format(self.round-1,time.time()-st))
             time.sleep(0.1)
         print("end normal")
