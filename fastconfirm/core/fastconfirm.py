@@ -508,7 +508,7 @@ class Fastconfirm:
         if self.round == 1:
             '''round1 block directly committed'''
             if vote_tag==1:
-                self.logger.info("output round {} {}".format(self.round, B))
+                self.logger.info("commit {}".format(B))
                 # print("output in round 1",B)
                 self.lB=B
             else:
@@ -520,7 +520,7 @@ class Fastconfirm:
                 if hash(self.lB) == B[0]:
                     self.height += 1
                     # print("output in round ", self.round, B)
-                    self.logger.info("commit in round {}: {} by hash(lB)=B".format(self.round, B))
+                    self.logger.info("commit: {} by hash(lB)=B".format(B))
                     # print("commit in round {}: {} by hash(lB)=B".format(self.round, B))
                     self.lastcommit = 1
                     self.lB = B
@@ -529,12 +529,12 @@ class Fastconfirm:
                         tB = self._tobe_commit.get()
                         self.height += 1
                         # print("output in round ", self.round, tB)
-                        self.logger.info("commit in round {}: {} by to commit".format(self.round,tB) )
+                        self.logger.info("commit: {} by to commit".format(tB))
                         # print("commit in round {}: {} by to commit".format(self.round, tB))
                     self.height += 1
                     # print("output in round ", self.round, B)
                     # print("commit in round {}: {} just =2".format(self.round, B))
-                    self.logger.info("commit in round {}: {} just =2".format(self.round, B))
+                    self.logger.info("commit: {} just =2".format(B))
                     self.lastcommit = 1
                     self.lB = B
             else:
@@ -639,7 +639,7 @@ class Fastconfirm:
             st = time.time()
             self.fastconfirm_round()
             print("finish round {} with in {} seconds".format(self.round - 1, time.time() - st))
-            self.logger.info("finish round {} with in {} seconds".format(self.round-1,time.time()-st))
+            self.logger.info("finish a round with in {} seconds".format(time.time()-st))
             time.sleep(0.1)
         print("end normal")
         # self.logger.debug("---------------------------------------------")
