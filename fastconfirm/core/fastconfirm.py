@@ -280,6 +280,7 @@ class Fastconfirm:
             vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                  self.round, t, my_pi, my_h, leader_msg, make_vote_send(self.id,self.round))
         else:
+            print(self.id,"does not committee in vote")
             (b, r, lg) = self.state
             maxh = 0
             block_dic = {}
@@ -299,8 +300,13 @@ class Fastconfirm:
                         continue
                 if maxh < int.from_bytes(h, 'big'):
                     maxh = int.from_bytes(h, 'big')
+                    leader = osender
                     # print(pid, "change:", leader)
-            print(self.id,"vote phase t!=1")
+                    leader_msg = (g, h, pi, B, hB, height, sig)
+                    # print(pid, "change:", leader)
+            print("get the leader: {} chosen {} block is {}".format(leader, leader_msg[4], leader_msg))
+            # print(self.id, "get the leader:", leader, "chosen block is:", leader_msg)
+
             vote(self.id, self.sid, self.N, self.sPK2s, self.sSK2, self.rpk, self.rsk, self.rmt,
                  self.round, t, my_pi, my_h, None, make_vote_send(self.id,self.round))
 
