@@ -119,7 +119,7 @@ class Fastconfirm:
         self.id = pid
         self.SLOTS_NUM = S
         self.N = N
-        self.f = f*0.6
+        self.f = f*0.4
         self.sPK2s = sPK2s
         self.sSK2 = sSK2
         self._send = send
