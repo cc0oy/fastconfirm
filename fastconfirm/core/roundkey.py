@@ -40,7 +40,7 @@ def vrify(sig, branch, msg, pk, root, position, key_num):
             print("path merkle verify error")
             return False
     else:
-        print("path verify ecdsa error")
+        # print("path verify ecdsa error")
         return False
 
 

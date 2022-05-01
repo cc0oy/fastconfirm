@@ -247,6 +247,7 @@ class Fastconfirm:
         self.logger.info("enter recv block proposal phase at {}".format(start))
         t, my_pi, my_h = memselection(self.round, 2, self.sPK2s[self.id], self.sSK2)
         B=None
+        block_dic = {}
         if t == 1:
             # wait for bp finish
             print("{} is selected in vote".format(self.id))
@@ -265,6 +266,7 @@ class Fastconfirm:
                 gevent.sleep(0)
                 # sender, osender,(g, h, pi, B, hB, height, sig) = bp_recvs.get()
                 sender, osender, (g, h, pi, B, hB, height, sig) = self._per_bp[self.round].get()
+                block_dic[hB] = (g, h, pi, B, hB, height, sig)
                 # print(sender, " ",osender,(g, h, pi, B, hB, height, sig))
                 if lg == 2 or (lg == 1 and self.lastcommit == 1):
                     if g == 0:
@@ -283,7 +285,6 @@ class Fastconfirm:
             print(self.id,"does not committee in vote")
             (b, r, lg) = self.state
             maxh = 0
-            block_dic = {}
             while time.time() - start < delta:
                 gevent.sleep(0.09)
             # self.step = 'F_VOTE'
@@ -294,7 +295,7 @@ class Fastconfirm:
             while self._per_bp[self.round].qsize()>0:
                 gevent.sleep(0)
                 sender, osender, (g, h, pi, B, hB, height, sig) = self._per_bp[self.round].get()
-                block_dic[osender]=(g, h, pi, B, hB, height, sig)
+                block_dic[hB]=(g, h, pi, B, hB, height, sig)
                 if lg == 2 or (lg == 1 and self.lastcommit == 1):
                     if g == 0:
                         continue
@@ -514,7 +515,7 @@ class Fastconfirm:
         if self.round == 1:
             '''round1 block directly committed'''
             if vote_tag==1:
-                self.logger.info("commit {}".format(B))
+                self.logger.info("commit {} with {}".format(pc_hB,block_dic[pc_hB]))
                 # print("output in round 1",B)
                 self.lB=B
             else:
