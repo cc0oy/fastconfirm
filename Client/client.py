@@ -21,7 +21,12 @@ class Client(Process):
     SEP = '\r\nSEP\r\nSEP\r\nSEP\r\n'.encode('utf-8')
 
     def __init__(self, my_ip, addresses_list, send_2_bftnode: Callable, port_num=5):
-
+        '''
+        my_ip: ip address
+        address_list: ip addrress to be connected
+        send_2_bftnode: send function
+        port_num: the number of ports each bft nodes connect
+        '''
         self.send_to_bft = send_2_bftnode
         # self.ready = client_ready
         # self.stop = stop

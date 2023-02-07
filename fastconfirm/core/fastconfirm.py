@@ -25,7 +25,6 @@ from collections import namedtuple, defaultdict
 from enum import Enum
 from gevent import Greenlet
 from gevent.queue import Queue
-from honeybadgerbft.core.honeybadger_block import honeybadger_block
 from honeybadgerbft.exceptions import UnknownTagError
 
 

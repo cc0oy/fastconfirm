@@ -146,7 +146,7 @@ if __name__ == '__main__':
     rnd = random.Random(sid)
 
     # Nodes list
-    addresses_node, my_address_node = network_config('hosts.config', N, i)
+    addresses_node, my_address_node = network_config('hosts(200).config', N, i)
 
     # port communicated with client
     # addresses_client, my_address_client = network_config('host_client.config', N,i)
@@ -220,8 +220,8 @@ if __name__ == '__main__':
     with net_ready.get_lock():
         net_ready.value = True
 
-    while time.time() < 1651376257.800285:
-        time.sleep(0.0001)
+    # while time.time() < 1651376257.800285:
+    #     time.sleep(0.0001)
 
     print("see the bft start time {}".format(time.time()))
     bft_thread = Greenlet(bft.run)

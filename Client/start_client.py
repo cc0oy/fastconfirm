@@ -18,7 +18,7 @@ import json
 import time
 from urllib.parse import urlparse
 from uuid import uuid4
-import requests
+# import requests
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from Client.Mempool import transaction
@@ -123,6 +123,37 @@ def submit():
         return jsonify(response), 200
 
 
+@app.route('/log', methods=['GET', 'POST'])
+def submit():
+    if request.method == "POST":
+        print("tets")
+        # return render_template('./test.html')
+        sender = request.form.get('sender')
+        receiver = request.form.get('receiver')
+        money = request.form.get('money')
+        fee = request.form.get('txs_fee')
+        seed = 1
+        rnd = random()
+        # tx_id_float = rnd.random()
+        # tx_id = hashlib.sha512(str(tx_id_float))
+        # tx_id = '000000'
+        local_time = time.asctime(time.localtime(time.time()))
+        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(now_time)
+        # mempool.put_nowait(a_transaction)
+        # broadcast(a_transaction, send, N)
+        tx_str=sender+receiver+money+fee+now_time
+        print(type(tx_str))
+        broadcast(tx_str)
+        response = {
+            'transaction time:': local_time,
+            'sender': sender,
+            'receiver': receiver,
+            'money': money,
+            'fee': fee
+        }
+        return jsonify(response), 200
+
 def test_print():
     print("test flask print")
 
@@ -148,7 +179,7 @@ if __name__ == '__main__':
     print("test1")
     addresses = [None] * N
     try:
-        with open('host_client2.config', 'r') as hosts:
+        with open('hosts(200).config', 'r') as hosts:
             print("open success")
             for line in hosts:
                 params = line.split()
